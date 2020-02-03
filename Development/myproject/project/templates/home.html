@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FYP</title>
+  </head>
+  <body>
+    <div class="container">
+      <ol class="breadcrumb my-4">
+        <h1 class="breadcrumb-item active">Currency Rates</h1>
+      </ol>
+      <table class="table">
+        <thread class="thead-dark">
+          <tr>
+            <th>Currency</th>
+            <th>Rates</th>
+          </tr>
+        </thread>
+        <tbody>
+          {% for rate in rates %}
+            <tr>
+              <td>
+                {{ base }}
+                <small class="text-muted d-block">{{ rate.KRW }}</small>
+              </td>
+              <td class="align-middle">0</td>
+              <td class="align-middle">0</td>
+              <td></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
