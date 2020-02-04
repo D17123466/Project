@@ -1,34 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>FYP</title>
-  </head>
-  <body>
-    <div class="container">
-      <ol class="breadcrumb my-4">
-        <h1 class="breadcrumb-item active">Currency Rates</h1>
-      </ol>
-      <table class="table">
-        <thread class="thead-dark">
-          <tr>
-            <th>Currency</th>
-            <th>Rates</th>
-          </tr>
-        </thread>
-        <tbody>
-          {% for rate in rates %}
-            <tr>
-              <td>
-                {{ base }}
-                <small class="text-muted d-block">{{ rate.KRW }}</small>
-              </td>
-              <td class="align-middle">0</td>
-              <td class="align-middle">0</td>
-              <td></td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </body>
+<style>
+  table, th, td {
+    border: 0px solid black;
+  }
+  thead {
+    background-color:gold
+  }
+  div {
+    margin-left: 50px;
+  }
+</style>
+<head>
+    <title>FYP - Prediction of currency exchange rate</title>
+</head>
+<body>
+  <h1 style="text-align: center;">Currency Exchange Rate</h1>
+
+  <!-- Rates API -->
+  <div>
+    <p><ins><strong>Rates</strong></ins></p>
+    <small>{{ date }}</small>
+    <table>
+      <thead>
+        <tr>
+          <th>Currency</th>
+          <th>Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key, value in rates %}
+        <tr>
+          <td>{{ key }}</td>
+          <td style="text-align: end;">{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <small>({{ base }})</small>
+  </div>
+
+  <!-- Currency Converter API -->
+  <div>
+    <p><ins><strong>Converter</strong></string></ins></p>
+    <p>{{ conversion_rate }}</p>
+  </div>
+
+</body>
 </html>
