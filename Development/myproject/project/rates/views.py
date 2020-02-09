@@ -30,15 +30,21 @@ def rates(request):
     rates = data['rates'].items()
 
     # Converter
+    if (request.GET):
+        print(request.GET['amount'])
+        print(request.GET['from'])
+        print(request.GET['to'])
+
     c = CurrencyRates()
     conversion_rate = c.convert('EUR', 'KRW', 0)
 
     # Mapping to template (home.html)
-    return render(request, 'home.html', {'base': base, 'date': date, 'rates': rates, 'conversion_rate': conversion_rate})
+    return render(request, 'base.html', {'base': base, 'date': date, 'rates': rates, 'conversion_rate': conversion_rate})
     # return render(request, 'home.html', {'rates' :CurrencyRates().get_rates('EUR', date.today())})
 
 
 # def converter(request):
+#     print(request.GET)
 #     c = CurrencyRates()
 #     conversion_rate = c.convert('EUR', 'KRW', 30000)
-#     return render(request, 'home.html', { 'conversion_rate': conversion_rate})
+#     return render(request, 'base.html', { 'conversion_rate': conversion_rate})
