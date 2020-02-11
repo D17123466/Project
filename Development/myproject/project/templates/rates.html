@@ -1,0 +1,25 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="container" style="margin-top: 50px; margin-bottom: 50px;">
+    <p><ins><strong>Rates</strong></ins></p>
+    <ins>({{ unit_base }})</ins>
+    <table class="table table-bordered" style="text-align: center;">
+        <thead>
+            <tr>
+                <th style="width: 60%;">Currency</th>
+                <th style="width: 25%;">Rate</th>
+                <th style="width: 15%;">Chart</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key, value in rates %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+                <td><a href="#">chart</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
