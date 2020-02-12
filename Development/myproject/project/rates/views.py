@@ -30,7 +30,7 @@ def rates(request):
     
     rates = json['rates'].items()
 
-    return render(request, 'rates.html', {'unit_base' : unit_base, 'date_updated' : date_updated, 'rates' : rates})
+    return render(request, 'index.html', {'unit_base' : unit_base, 'date_updated' : date_updated, 'rates' : rates})
 
 
 
