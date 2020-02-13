@@ -21,4 +21,5 @@ from rates import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.rates, name='rates'),
+    path('create/', views.create, name='create')
 ]
