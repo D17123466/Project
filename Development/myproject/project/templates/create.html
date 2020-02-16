@@ -5,7 +5,7 @@
 <div class="container" style="margin-top: 50px; margin-bottom: 50px;">
     <h2>Currency Calculator</h2>
 
-    <form action="" method="GET">
+    <form action="" method="Get">
         <!-- {% csrf_token %} -->
         <div class="row">
             <div class="col-4">
@@ -23,9 +23,7 @@
     <div class="result">
         <p>
             {% if form.is_valid %}
-                {{ result }}
-                <!-- {{ from }}
-                {{ to }} -->
+                {{ amount }} {{ from }} = {{ result }} {{ to }}
             {% endif %}
         </p>
     </div>

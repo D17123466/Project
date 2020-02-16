@@ -59,7 +59,7 @@ def create(request):
         
         # context = {'amount': amount_, 'from': from_, 'to': to_}
         # return render(request, 'create.html', {'form': form, 'amount': amount_, 'from': from_, 'to': to_})
-        return render(request, 'create.html', {'form': form, 'result': result})
+        return render(request, 'create.html', {'form': form, 'amount': amount_, 'from': from_, 'result': result, 'to': to_})
 
     # if (request.GET):
     #     amount_ = request.GET['amount_']
