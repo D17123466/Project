@@ -48,8 +48,10 @@
 
 #### In the directory <Final_Test>
 
-> pip3 install virtualenv
-> virtualenv env -p python3
+```
+pip3 install virtualenv
+virtualenv env -p python3
+```
 
 ### Virtual Environment
 
@@ -57,24 +59,34 @@
 
 ##### For Mac OS
 
-> source env/bin/activate 
+```
+source env/bin/activate
+```
 
 ##### For Windows
 
-> env\bin\activate
+```
+env\bin\activate
+```
 
 #### Deactivate
 
-> deactivate
+```
+deactivate
+```
 
 ### Install The Required Packages
 
-> pip install -r requirements.txt
+```
+pip install -r requirements.txt
+```
 
 ### Run 
 
-> flask run
+```
+flask run
+```
 
 ### Open
 
-[http://127.0.0.1:5000/](http://127.0.0.1:5000/)
+> [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
