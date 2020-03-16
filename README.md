@@ -46,6 +46,8 @@
 
 ### Init Setting
 
+#### In the directory <Final_Test>
+
 > pip3 install virtualenv
 > virtualenv env -p python3
 
@@ -68,3 +70,7 @@
 ### Install The Required Packages
 
 > pip install -r requirements.txt
+
+### Run 
+
+<addr> flask run
