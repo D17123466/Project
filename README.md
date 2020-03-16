@@ -1,6 +1,6 @@
 # Final Year Project
 
-## Demo 
+## Demo:
 
 ### This is the directory in terms of demo for Interim Demo Version. It is the work that is used to provide the simple purpose of this Final Year Project. 
 
@@ -12,7 +12,7 @@
 <br>
 
 
-## Final_Test & Final_Prod 
+## Final_Test & Final_Prod:
 
 ### This is the directories where the project bas been being developed.
 
@@ -31,13 +31,40 @@
     
   - <b>Currency Conversion & Currency Exchange Rates</b>
   
-    - Dataset (Free verison API from external source)
+    - Dataset (Free version API from external source)
     
   
   - <b>Model</b>
   
     - On Progress.
   
+
+<br>
+<br>
   
-  
-  
+## Development Environment:
+
+### Init Setting
+
+> pip3 install virtualenv
+> virtualenv env -p python3
+
+### Virtual Environment
+
+#### Activate
+
+##### For Mac OS
+
+> source env/bin/activate 
+
+##### For Windows
+
+> env\bin\activate
+
+#### Deactivate
+
+> deactivate
+
+### Install The Required Packages
+
+> pip install -r requirements.txt
