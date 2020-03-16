@@ -14,7 +14,7 @@
 
 ## Final_Test & Final_Prod 
 
-### This is the directories that the project bas been being developed.
+### This is the directories where the project bas been being developed.
 
 #### This project has the functions and technologies the followings:
 
