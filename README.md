@@ -8,10 +8,8 @@
 
   - The line graph that shows the prediction of currency exchange rate (based EURO as default).
 
-
-
-
-
+<br>
+<br>
 
 
 ## Final_Test & Final_Prod 
