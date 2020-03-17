@@ -12,7 +12,7 @@
 <br>
 
 
-## Final_Test & Final_Prod:
+## Final:
 
 ### This is the directories where the project bas been being developed.
 
@@ -46,7 +46,7 @@
 
 ### Init Setting
 
-#### In the directory <Final_Test>
+#### In the directory <Final>
 
 ```
 pip3 install virtualenv
