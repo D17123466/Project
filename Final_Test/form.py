@@ -3,7 +3,6 @@ from wtforms import FloatField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 import requests
 
-
 class ConverterForm(FlaskForm):
     # url = 'https://api.exchangerate-api.com/v4/latest/EUR'
     url = 'https://api.exchangeratesapi.io/latest'
