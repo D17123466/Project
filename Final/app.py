@@ -4,9 +4,11 @@ from form import ConverterForm
 from flask_bootstrap import Bootstrap
 from datetime import datetime, timedelta 
 
-# url_default = 'https://api.exchangerate-api.com/v4/latest/'
-url_default = 'https://api.exchangeratesapi.io/latest'
-url_history = 'https://api.exchangeratesapi.io/history'
+# URL_DEFAULT = 'https://api.exchangerate-api.com/v4/latest/'
+
+# URLs for latest rates and historical rates
+URL_DEFAULT = 'https://api.exchangeratesapi.io/latest'
+URL_HISTORY = 'https://api.exchangeratesapi.io/history'
 
 
 # model = tf.keras.models.load_model('model/model.h5')
@@ -22,9 +24,9 @@ def main():
 
     form = ConverterForm()
 
-    # url = url_default + "EUR"
-    url = url_default
-    response = requests.get(url)
+    # URL = URL_DEFAULT + "EUR"
+    URL = URL_DEFAULT
+    response = requests.get(URL)
     json = response.json()
 
     unit_base = json['base']
@@ -44,10 +46,10 @@ def main():
         to_ = request.form['to_']
 
         if from_ != 'EUR' or to_ !='EUR':
-            # url = url_default + from_
-            url = url_default + '?base=' + from_
+            # URL = URL_DEFAULT + from_
+            URL = URL_DEFAULT + '?base=' + from_
 
-            response = requests.get(url)
+            response = requests.get(URL)
             json = response.json()
             result = float(json['rates'][to_] * float(amount))
             
@@ -66,9 +68,9 @@ def chart():
     start_at = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
     end_at = datetime.today().strftime("%Y-%m-%d")
 
-    url = url_history + '?start_at=' + start_at + '&end_at=' + end_at
+    URL = URL_HISTORY + '?start_at=' + start_at + '&end_at=' + end_at
 
-    response = requests.get(url)
+    response = requests.get(URL)
     json = response.json()
     json = json['rates'].items()
     
