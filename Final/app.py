@@ -2,7 +2,17 @@ from flask import Flask, render_template, request
 import requests
 from form import ConverterForm
 from flask_bootstrap import Bootstrap
-from datetime import datetime, timedelta 
+from datetime import datetime, timedelta
+from predict import loadTrainedModel, build_window, getConvertToArray, MinMaxScaler, ActualScaler, getPredict
+
+import pandas as pd
+import numpy as np
+
+# import keras
+import tensorflow as tf
+
+import os 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # URL_DEFAULT = 'https://api.exchangerate-api.com/v4/latest/'
 
@@ -73,19 +83,46 @@ def chart():
     response = requests.get(URL)
     json = response.json()
     json = json['rates'].items()
-    
+
+
     # rates = [(key, value) for key, value in json]
     rates = {}
     for key, value in sorted(json):
         # print(str(key) + '=>' + str(value))
         rates[key] = value[unit]
 
+
+    size = len(rates)
+
+    input_value = dict(list(rates.items())[size-178:])
+
+
+    df = pd.DataFrame(list(input_value.items()), columns=['Date', 'Rate'])
+    
+
+    df_rate = getConvertToArray(df)
+
+    rate_max = np.max(df_rate, 0)
+    rate_min = np.min(df_rate, 0)
+
+    print('app.py: ', rate_max, rate_min)
+
+    df_set = MinMaxScaler(df_rate)
+
+
+    df_x, df_y = build_window(df_set, 50)
+
+
+    model = loadTrainedModel('model_krw')
+
+    results = getPredict(model, df_x, rate_max, rate_min)
+
     if request.method == 'GET':
-        return render_template('chart.html', rates=rates, unit=unit)
+        return render_template('chart.html', rates=rates, unit=unit, results=results)
         
     if request.method == 'POST':
-        status = 'After'
-        return render_template('chart.html', rates=rates, unit=unit)      
+        # status = 'After'
+        return render_template('chart.html', rates=rates, unit=unit, results=results)      
         
 
 

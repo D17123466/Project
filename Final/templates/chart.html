@@ -15,7 +15,10 @@
     labels_hist.push('{{ key }}')
     data_hist.push('{{ value }}')
   '{% endfor %}'
-
+  '{% for key, value in results.items() %}'
+    labels_hist.push('{{ key }}')
+    data_hist.push('{{ value }}')
+  '{% endfor %}'
   var ctx = document.getElementById('chart_currency').getContext('2d');
   var data = {
       type: 'line',
