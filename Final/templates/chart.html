@@ -5,43 +5,68 @@
   <h2>Chart</h2>
   <canvas id="chart_currency" width="400" height="200"></canvas>
   <div style="margin-left: 80%; margin-top: 5%; margin-bottom: 5%;">
-    <a href="{{ url_for('main') }}"><button type="button" class="btn btn-primary">Return</button></a>
+    <div id='app'>
+      <button v-if='isActive' v-on:click='isActive = !isActive' id="addData" type="button" class="btn btn-primary">Add Prediction</button>
+      <button v-else v-on:click='isActive = !isActive' id="removeData" type="button" class="btn btn-primary">Drop Prediction</button>
+    </div>
+    <!-- <button id="addData" type="button" class="btn btn-primary">Add Prediction</button>
+    <button id="removeData" type="button" class="btn btn-primary">Drop</button>
+    <a href="{{ url_for('main') }}"><button type="button" class="btn btn-primary">Return</button></a> -->
   </div>
 </div>
+<style>
+  canvas {
+    -moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+  }
+</style>
 <script>
-  var labels_hist = [];
-  var data_hist = [];
+  var app = new Vue({
+      el: '#app',
+      data: {      
+          isActive: true,
+          
+      }
+  });
+</script>
+<script>
+  var timeFormat = 'DD/MM/YYYY';
+
+  // var labels_hist = [];
+  // var data_hist = [];
+
+  var dataPoints = [];
   '{% for key, value in rates.items() %}'
-    labels_hist.push('{{ key }}')
-    data_hist.push('{{ value }}')
+    // labels_hist.push('{{ key }}')
+    // data_hist.push('{{ value }}')
+    dataPoints.push({
+      x: '{{ key }}',
+      y: '{{ value }}'
+    })
   '{% endfor %}'
-  '{% for key, value in results.items() %}'
-    labels_hist.push('{{ key }}')
-    data_hist.push('{{ value }}')
-  '{% endfor %}'
-  var ctx = document.getElementById('chart_currency').getContext('2d');
-  var data = {
+
+  // document.getElementById("demo").innerHTML = JSON.stringify(dataPoints)
+  
+  var config = {
       type: 'line',
       data: {
-          labels: labels_hist,
+          // labels: labels_hist,
           datasets: [{
               label: 'Historical Rates',
-              data: data_hist,
-              fill:false,
-              // backgroundColor: 'rgb(30,144,255)',
-              // borderColor: 'rgb(30,144,255)',
-              // borderWidth: 1,
-              // fillColor: 'gba(151,187,205,0.2)',
-              // strokeColor: 'rgba(151,187,205,1)',
-              // pointColor: "rgba(151,187,205,1)",
-              // pointStrokeColor: "#fff",
-              // pointHighlightFill: "#fff",
-              // pointHighlightStroke: "rgba(151,187,205,1)",
-              // lineTension:0.1, 
+              // data: data_hist,
+              data: dataPoints,
+              fill: false,
+              backgroundColor: window.chartColors.blue,
+              borderColor: window.chartColors.blue,
+              // pointRadius: 1,
+              // lineTension: 0,
+              // borderWidth: 2
           }]
       },
       // Configuration options go here
       options: {
+        responsive: true,
         title: {
           display: true,
           text: 'EUR - {{ unit }}',
@@ -49,7 +74,31 @@
           position: 'top',
           padding: 15,
         },
+        tooltips: {
+          mode: 'index',
+        },
+        hover: {
+          mode: 'index',
+        },
         scales: {
+          xAxes: [{
+            type: 'time',
+            // display: true,
+						// ticks: {
+						// 	callback: function(dataLabel, index) {
+						// 		// Hide the label of every 2nd dataset. return null to hide the grid line too
+						// 		return index % 2 === 0 ? dataLabel : '';
+						// 	}
+            // }
+            time: {
+              format: timeFormat,
+              tooltipsFormat: 'll'
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'Date'
+            }
+          }],
           yAxes: [{
             ticks: {
               beginAtZero: false,
@@ -67,9 +116,54 @@
           display: true,
           position: 'right',
         },
-        responsive: true,
       }
   };
-  var chart = new Chart(ctx, data);
+
+  window.onload = function() {
+    var ctx = document.getElementById('chart_currency').getContext('2d');
+    window.chart = new Chart(ctx, config);
+  };
+
+  document.getElementById('addData').addEventListener('click', function() {
+    // var labels_pred = [];
+    // var data_pred = [];
+    var dataPoints2 = [];
+    // dataPoints2.push(JSON.stringify(dataPoints.slice(-1)[0]))
+    dataPoints2.push({
+      x: dataPoints.slice(-1).map(({x}) => x)[0],
+      y: dataPoints.slice(-1).map(({y}) => y)[0]
+    })
+    '{% for key, value in results.items() %}'
+        // labels_pred.push('{{ key }}')
+        // data_pred.push('{{ value }}')
+        dataPoints2.push({
+          x: '{{ key }}',
+          y: '{{ value }}'
+        })
+    '{% endfor %}'
+    var dataset_pred = {
+      label: 'Predictive Rates',
+      // data: data_pred,
+      data: dataPoints2,
+      fill: false,
+      backgroundColor: window.chartColors.red,
+      borderColor: window.chartColors.red,
+      // pointRadius: 1,
+      // lineTension: 0,
+      // borderWidth: 2
+    }
+    // config.data.datasets.forEach(function(dataset) {
+		// 			dataset.data.push(randomScalingFactor());
+		// });
+    // config.data.labels.push(labels_pred)
+    config.data.datasets.push(dataset_pred)
+    window.chart.update();
+  });
+
+  document.getElementById('removeData').addEventListener('click', function() {
+    config.data.datasets.pop();
+    window.chart.update();
+  });
+
 </script>
 {% endblock %}

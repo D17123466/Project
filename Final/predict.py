@@ -116,11 +116,10 @@ def loadTrainedModel(model_name):
 
 
 def getPredict(model, predict_input, rate_max, rate_min):
-    predict_Start = (datetime.today() + timedelta(days=1)).date()
+    predict_start = (datetime.today() + timedelta(days=0)).date()
     predict_end = (datetime.today() + timedelta(days=178)).date()
-    days = (predict_end-predict_Start).days + 1
-    dates = [predict_Start + timedelta(days=x) for x in range(days)]
-
+    days = (predict_end-predict_start).days + 1
+    dates = [predict_start + timedelta(days=x) for x in range(days)]
     date = []
     for d in dates:
         if not d.isoweekday() in (6, 7):
@@ -131,8 +130,10 @@ def getPredict(model, predict_input, rate_max, rate_min):
 
     results = {}
     for i in range(0, len(predict_actual)):
-        results[date[i]] = round(predict_actual.item(i), 2)
-
+        # results[date[i]] = round(predict_actual.item(i), 2)
+        d = datetime.strptime(date[i], '%Y-%m-%d').date()
+        d = d.strftime('%d/%m/%Y')
+        results[d] = float(round(predict_actual.item(i), 2))
     return results
     
 

@@ -88,8 +88,10 @@ def chart():
     # rates = [(key, value) for key, value in json]
     rates = {}
     for key, value in sorted(json):
-        # print(str(key) + '=>' + str(value))
-        rates[key] = value[unit]
+        # print(str(key) + '=>' + str(value[unit]))
+        d = datetime.strptime(key, '%Y-%m-%d').date()
+        d = d.strftime('%d/%m/%Y')
+        rates[d] = float(value[unit])
 
 
     size = len(rates)
@@ -105,8 +107,6 @@ def chart():
     rate_max = np.max(df_rate, 0)
     rate_min = np.min(df_rate, 0)
 
-    print('app.py: ', rate_max, rate_min)
-
     df_set = MinMaxScaler(df_rate)
 
 
@@ -117,6 +117,9 @@ def chart():
 
     results = getPredict(model, df_x, rate_max, rate_min)
 
+    # print(results)
+
+
     if request.method == 'GET':
         return render_template('chart.html', rates=rates, unit=unit, results=results)
         
@@ -124,5 +127,3 @@ def chart():
         # status = 'After'
         return render_template('chart.html', rates=rates, unit=unit, results=results)      
         
-
-

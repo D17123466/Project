@@ -4,7 +4,7 @@ import tensorflow as tf
 # import pandas as pd
 # import requests
 from datetime import datetime, timedelta 
-from predict import getHistoricalDataset, getConvertToArray, getTrainTestSplite, MinMaxScaler, build_window, getModel, executeTrain, evaluateModel, saveTrainedModel
+from predict import getHistoricalDataset, getConvertToArray, getTrainTestSplite, MinMaxScaler, build_window, getModel, executeTrain, evaluateModel, saveTrainedModel, loadTrainedModel, getPredict
 
 # URL for historical rates
 URL_HISTORY = 'https://api.exchangeratesapi.io/history'
@@ -24,6 +24,8 @@ iterations = 20
 size = 0.9 # the portion of the dataset to in the train split
 
 dataset = getHistoricalDataset(URL, 'KRW')
+
+print(dataset)
 
 dataset_rate = getConvertToArray(dataset)
 
