@@ -42,10 +42,9 @@ def main():
     unit_base = json['base']
     date_updated = datetime.strptime(json['date'], "%Y-%m-%d").date().strftime("%d / %b / %Y")
 
-    rates = json['rates'].items()
-    rates = [(key, value) for key, value in rates]
+    json_rate = json['rates'].items()
+    rates = [(key, value)  for key, value in json_rate if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
     rates = rates[::-1]
-    
 
     if request.method == 'GET':
         return render_template('basic.html', form=form, unit_base=unit_base, date_updated=date_updated, rates=rates)
@@ -91,8 +90,11 @@ def chart():
         # print(str(key) + '=>' + str(value[unit]))
         d = datetime.strptime(key, '%Y-%m-%d').date()
         d = d.strftime('%d/%m/%Y')
+        # print(str(value[unit])[::-1].find('.'))
         rates[d] = float(value[unit])
 
+
+    
 
     size = len(rates)
 
@@ -113,7 +115,7 @@ def chart():
     df_x, df_y = build_window(df_set, 50)
 
 
-    model = loadTrainedModel('model_krw')
+    model = loadTrainedModel('model_' + unit)
 
     results = getPredict(model, df_x, rate_max, rate_min)
 

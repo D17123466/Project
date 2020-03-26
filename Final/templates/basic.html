@@ -43,9 +43,9 @@
                     <!-- {{ wtf.quick_form(form, method="POST", role="form", form_type="horizontal") }}                 -->
                     <form action="" method="POST" class="form" role="form" style="margin-top: 5%;">
                         {{ wtf.form_field(form.amount, class='form-control', placeholder='0') }}
-                        {{ wtf.form_field(form.from_, class='form-control') }}
+                        {{ wtf.form_field(form.from_, class='form-control' ) }}
                         {{ wtf.form_field(form.to_, class='form-control') }}
-                         <p><input type=submit class="btn btn-primary" style="margin-top: 5%;">
+                        <p><input type=submit class="btn btn-primary" style="margin-top: 5%;"></p>
                         <!-- <button type="button" class="btn btn-primary">Submit</button> -->
                     </form>
                     <div style="margin-top: 5%">
@@ -58,10 +58,9 @@
         </div>
         <div class="col-sm-9">
             <div class="container">
-                <h2>Rates</h2>
-                <div style="margin-left: 80%;">
-                    <ins>({{ unit_base }})</ins>
-                    <ins>{{ date_updated }}</ins>
+                <h2>Rate</h2>
+                <div style="margin-left: 70%; margin-bottom: 1%;">
+                    <p>{{ date_updated }}<img width="50" height="25" src="{{ url_for('static', filename='icon/EUR.svg') }}">EUR</p>
                 </div>
                 <input type="text" id="myInput" onkeyup="filter()" placeholder="Type for currency...">
                 <table id="myTable" class="table table-bordered" style="text-align: center;" >
@@ -76,9 +75,30 @@
                         {% for key, value in rates %}
                         <tr>
                             {%  if key != 'EUR' %}
-                            <td>{{ key }}</td>
-                            <!-- <td><img size=10 src="{{ url_for('static', filename='icon/{{ key }}.svg') }}"></td> -->
-                            <td>{{ value }}</td>
+                              {% if key == 'KRW' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/KRW.svg') }}">{{ key }}</td>
+                              {% elif key == 'GBP' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/GBP.svg') }}">{{ key }}</td>
+                              {% elif key == 'AUD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/AUD.svg') }}">{{ key }}</td>
+                              {% elif key == 'CAD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/CAD.svg') }}">{{ key }}</td>
+                              {% elif key == 'CHF' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/CHF.svg') }}">{{ key }}</td>                                
+                              {% elif key == 'CNY' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/CNY.svg') }}">{{ key }}</td>
+                              {% elif key == 'HKD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/HKD.svg') }}">{{ key }}</td>                                
+                              {% elif key == 'JPY' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/JPY.svg') }}">{{ key }}</td>
+                              {% elif key == 'NZD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/NZD.svg') }}">{{ key }}</td>
+                              {% elif key == 'SEK' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/SEK.svg') }}">{{ key }}</td>
+                              {% elif key == 'USD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/USD.svg') }}">{{ key }}</td>
+                              {% endif %}
+                              <td>{{ value }}</td>
                             <td>
                                 <a href="{{ url_for('chart', Unit=key ) }}"><button type="button" class="btn btn-primary">Chart</button></a>      
                             </td>

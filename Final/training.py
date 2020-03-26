@@ -23,24 +23,23 @@ learning_rate = 0.01
 iterations = 20
 size = 0.9 # the portion of the dataset to in the train split
 
-dataset = getHistoricalDataset(URL, 'KRW')
+for unit in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']:
+    dataset = getHistoricalDataset(URL, unit)
 
-print(dataset)
+    dataset_rate = getConvertToArray(dataset)
 
-dataset_rate = getConvertToArray(dataset)
+    train_set, test_set = getTrainTestSplite(dataset_rate, size, seq_length)
 
-train_set, test_set = getTrainTestSplite(dataset_rate, size, seq_length)
+    train_set = MinMaxScaler(train_set)
+    test_set = MinMaxScaler(test_set)
 
-train_set = MinMaxScaler(train_set)
-test_set = MinMaxScaler(test_set)
+    X_train, y_train = build_window(train_set, seq_length)
+    X_test, y_test = build_window(test_set, seq_length)
 
-X_train, y_train = build_window(train_set, seq_length)
-X_test, y_test = build_window(test_set, seq_length)
+    lstm_model = getModel(input_dim, output_dim, seq_length, learning_rate)
 
-lstm_model = getModel(input_dim, output_dim, seq_length, learning_rate)
+    executeTrain(lstm_model, X_train, y_train, iterations)
 
-executeTrain(lstm_model, X_train, y_train, iterations)
+    evaluateModel(lstm_model, X_test, y_test)
 
-evaluateModel(lstm_model, X_test, y_test)
-
-saveTrainedModel(lstm_model, 'model_krw')
+    saveTrainedModel(lstm_model, 'model_' + unit)

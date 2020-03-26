@@ -9,12 +9,10 @@ class ConverterForm(FlaskForm):
     response = requests.get(url)
     json = response.json()
     rates = json['rates']
-
-    units = [(key, key) for key in rates]
+    units = [(key, key) for key in rates if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
     units.append(('EUR', 'EUR'))
-
     units = units[::-1]
-
+    
     amount = FloatField('Amount', validators=[DataRequired()])
     from_ = SelectField('From',  choices=units)
     to_ = SelectField('To',  choices=units)

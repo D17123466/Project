@@ -117,14 +117,16 @@ def loadTrainedModel(model_name):
 
 def getPredict(model, predict_input, rate_max, rate_min):
     predict_start = (datetime.today() + timedelta(days=0)).date()
-    predict_end = (datetime.today() + timedelta(days=178)).date()
+    predict_end = (datetime.today() + timedelta(days=180)).date()
     days = (predict_end-predict_start).days + 1
     dates = [predict_start + timedelta(days=x) for x in range(days)]
     date = []
     for d in dates:
         if not d.isoweekday() in (6, 7):
             date.append(d.strftime('%Y-%m-%d'))
-    
+        if len(date) == 128:
+            break
+
     predict = model.predict(predict_input)
     predict_actual = ActualScaler(predict, rate_max, rate_min)
 
@@ -133,7 +135,7 @@ def getPredict(model, predict_input, rate_max, rate_min):
         # results[date[i]] = round(predict_actual.item(i), 2)
         d = datetime.strptime(date[i], '%Y-%m-%d').date()
         d = d.strftime('%d/%m/%Y')
-        results[d] = float(round(predict_actual.item(i), 2))
+        results[d] = float((predict_actual.item(i)))
     return results
     
 
