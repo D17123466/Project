@@ -9,7 +9,7 @@ from predict import getHistoricalDataset, getConvertToArray, getTrainTestSplite,
 # URL for historical rates
 URL_HISTORY = 'https://api.exchangeratesapi.io/history'
 
-# Version 1, set dataset for the amount of 3 years
+# Version 1, set dataset for the amount of 5 years
 start_at = (datetime.today() - timedelta(days=365*5)).strftime("%Y-%m-%d")
 end_at = datetime.today().strftime("%Y-%m-%d")
 
@@ -40,6 +40,6 @@ for unit in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK
 
     executeTrain(lstm_model, X_train, y_train, iterations)
 
-    evaluateModel(lstm_model, X_test, y_test)
+    # evaluateModel(lstm_model, X_test, y_test)
 
     saveTrainedModel(lstm_model, 'model_' + unit)
