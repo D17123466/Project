@@ -20,13 +20,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 URL_DEFAULT = 'https://api.exchangeratesapi.io/latest'
 URL_HISTORY = 'https://api.exchangeratesapi.io/history'
 
-
-# model = tf.keras.models.load_model('model/model.h5')
-
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'D17123466'
 Bootstrap(app)
-
 
 # Currency Converter & Rates
 @app.route('/', methods=['GET', 'POST'])
@@ -45,6 +41,7 @@ def main():
     json_rate = json['rates'].items()
     rates = [(key, value)  for key, value in json_rate if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
     rates = rates[::-1]
+    
 
     if request.method == 'GET':
         return render_template('basic.html', form=form, unit_base=unit_base, date_updated=date_updated, rates=rates)
@@ -90,37 +87,19 @@ def chart():
         # print(str(key) + '=>' + str(value[unit]))
         d = datetime.strptime(key, '%Y-%m-%d').date()
         d = d.strftime('%d/%m/%Y')
-        # print(str(value[unit])[::-1].find('.'))
         rates[d] = float(value[unit])
 
 
-    
-
     size = len(rates)
-
     input_value = dict(list(rates.items())[size-178:])
-
-
     df = pd.DataFrame(list(input_value.items()), columns=['Date', 'Rate'])
-    
-
     df_rate = getConvertToArray(df)
-
     rate_max = np.max(df_rate, 0)
     rate_min = np.min(df_rate, 0)
-
     df_set = MinMaxScaler(df_rate)
-
-
     df_x, df_y = build_window(df_set, 50)
-
-
     model = loadTrainedModel('model_' + unit)
-
     results = getPredict(model, df_x, rate_max, rate_min)
-
-    # print(results)
-
 
     if request.method == 'GET':
         return render_template('chart.html', rates=rates, unit=unit, results=results)
