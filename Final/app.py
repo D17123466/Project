@@ -3,7 +3,7 @@ import requests
 from form import ConverterForm
 from flask_bootstrap import Bootstrap
 from datetime import datetime, timedelta
-from predict import loadTrainedModel, build_window, getConvertToArray, MinMaxScaler, ActualScaler, getPredict
+from utils import loadTrainedModel, build_window, getConvertToArray, MinMaxScaler, ActualScaler, getPrediction, setPrediction, setJobScheduler
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -17,9 +17,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 URL_DEFAULT = 'https://api.exchangeratesapi.io/latest'
 URL_HISTORY = 'https://api.exchangeratesapi.io/history'
 
+# Configure Flask
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'D17123466'
 Bootstrap(app)
+
+# Configure Job Scheduler kicking off the task updating the trained LSTM model
+setJobScheduler()
 
 # Currency Converter & Rates
 @app.route('/', methods=['GET', 'POST'])
@@ -92,23 +96,12 @@ def chart():
         d = d.strftime('%d/%m/%Y')
         rates[d] = float(value[unit])
 
-    # Prediction
-    size = len(rates)
-    input_value = dict(list(rates.items())[size-178:])
-    df = pd.DataFrame(list(input_value.items()), columns=['Date', 'Rate'])
-    df_rate = getConvertToArray(df)
-    rate_max = np.max(df_rate, 0)
-    rate_min = np.min(df_rate, 0)
-    df_set = MinMaxScaler(df_rate)
-    df_x, df_y = build_window(df_set, 50)
-    model = loadTrainedModel('model_' + unit)
-    results = getPredict(model, df_x, rate_max, rate_min)
+    # Get Prediction
+    results = setPrediction(rates, 50, unit)
 
     if request.method == 'GET':
-        print('I am GET')
         return render_template('chart.html', rates=rates, unit=unit, results=results)
         
     if request.method == 'POST':
-        print('I am POST')
         return render_template('chart.html', rates=rates, unit=unit, results=results)      
         

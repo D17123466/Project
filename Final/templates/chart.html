@@ -34,29 +34,18 @@
 </script> -->
 <script>
   var timeFormat = 'DD/MM/YYYY';
-
-  // var labels_hist = [];
-  // var data_hist = [];
-
   var dataPoints = [];
   '{% for key, value in rates.items() %}'
-    // labels_hist.push('{{ key }}')
-    // data_hist.push('{{ value }}')
     dataPoints.push({
       x: '{{ key }}',
       y: '{{ value }}'
     })
   '{% endfor %}'
-
-  // document.getElementById("demo").innerHTML = JSON.stringify(dataPoints)
-  
   var config = {
       type: 'line',
       data: {
-          // labels: labels_hist,
           datasets: [{
               label: 'Historical',
-              // data: data_hist,
               data: dataPoints,
               fill: false,
               backgroundColor: window.chartColors.blue,
@@ -66,7 +55,7 @@
               borderWidth: 2
           }]
       },
-      // Configuration options go here
+      // Configuration options 
       options: {
         // responsive: false,
         title: {
@@ -149,17 +138,12 @@
   };
 
   document.getElementById('addData').addEventListener('click', function() {
-    // var labels_pred = [];
-    // var data_pred = [];
     var dataPoints2 = [];
-    // dataPoints2.push(JSON.stringify(dataPoints.slice(-1)[0]))
     dataPoints2.push({
       x: dataPoints.slice(-1).map(({x}) => x)[0],
       y: dataPoints.slice(-1).map(({y}) => y)[0]
     })
     '{% for key, value in results.items() %}'
-        // labels_pred.push('{{ key }}')
-        // data_pred.push('{{ value }}')
         dataPoints2.push({
           x: '{{ key }}',
           y: '{{ value }}'
@@ -167,7 +151,6 @@
     '{% endfor %}'
     var dataset_pred = {
       label: 'Predictive',
-      // data: data_pred,
       data: dataPoints2,
       fill: false,
       backgroundColor: window.chartColors.red,
@@ -176,10 +159,6 @@
       lineTension: 0,
       borderWidth: 2
     }
-    // config.data.datasets.forEach(function(dataset) {
-		// 			dataset.data.push(randomScalingFactor());
-		// });
-    // config.data.labels.push(labels_pred)
     config.data.datasets.push(dataset_pred)
     window.chart.update();
   });
@@ -188,6 +167,5 @@
     config.data.datasets.pop();
     window.chart.update();
   });
-
 </script>
 {% endblock %}
