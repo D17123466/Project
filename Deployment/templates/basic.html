@@ -1,0 +1,117 @@
+{% extends 'main.html' %}
+{% block content %}
+<!-- <style>
+    #myInput {
+      background-position: 10px 10px;
+      background-repeat: no-repeat;
+      width: 100%;
+      font-size: 16px;
+      padding: 12px 20px 12px 40px;
+      border: 1px solid #ddd;
+      margin-bottom: 12px;
+    }
+</style> -->
+<div class="container" style="margin-top: 5%; margin-bottom: 5%;">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="container">
+                <h2>Converter</h2>
+                <div class="form-row">
+                    <!-- {{ wtf.quick_form(form, method="POST", role="form", form_type="horizontal") }}                 -->
+                    <form action="" method="POST" class="form" role="form" style="margin-top: 5%;">
+                        {{ wtf.form_field(form.amount, class='form-control', placeholder='0') }}
+                        {{ wtf.form_field(form.from_, class='form-control' ) }}
+                        {{ wtf.form_field(form.to_, class='form-control') }}
+                        <p><input type=submit class="btn btn-primary" style="margin-top: 5%;"></p>
+                        <!-- <button type="button" class="btn btn-primary">Submit</button> -->
+                    </form>
+                    <div style="margin-top: 5%">
+                        {% if form.is_submitted and result %}
+                        <div class="breadcrumb">{{ amount }} {{ from_ }} = {{  result  }} {{ to_ }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9">
+            <div class="container">
+                <h2>Rate</h2>
+                <div style="margin-left: 65%; margin-bottom: 1%;">
+                    <p>Updated ({{ date_updated }})<img width="50" height="25" src="{{ url_for('static', filename='icon/EUR.svg') }}">EUR</p>
+                </div>
+                <!-- <input type="text" id="myInput" onkeyup="filter()" placeholder="Type for currency..."> -->
+                <table id="myTable" class="table table-bordered" style="text-align: center;" >
+                    <thead>
+                        <tr>
+                            <th style="width: 60%;">Currency</th>
+                            <th style="width: 25%;">Rate</th>
+                            <th style="width: 15%;">Chart</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in rates %}
+                        <tr>
+                            {%  if key != 'EUR' %}
+                              {% if key == 'KRW' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/KRW.svg') }}">{{ key }}</td>
+                              {% elif key == 'GBP' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/GBP.svg') }}">{{ key }}</td>
+                              {% elif key == 'AUD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/AUD.svg') }}">{{ key }}</td>
+                              {% elif key == 'CAD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/CAD.svg') }}">{{ key }}</td>
+                              {% elif key == 'CHF' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/CHF.svg') }}">{{ key }}</td>                                
+                              {% elif key == 'CNY' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/CNY.svg') }}">{{ key }}</td>
+                              {% elif key == 'HKD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/HKD.svg') }}">{{ key }}</td>                                
+                              {% elif key == 'JPY' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/JPY.svg') }}">{{ key }}</td>
+                              {% elif key == 'NZD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/NZD.svg') }}">{{ key }}</td>
+                              {% elif key == 'SEK' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/SEK.svg') }}">{{ key }}</td>
+                              {% elif key == 'USD' %}
+                                <td><img width="50" height="25" src="{{ url_for('static', filename='icon/USD.svg') }}">{{ key }}</td>
+                              {% endif %}
+                              <td>{{ value }}</td>
+                            <td>
+                                <a href="{{ url_for('chart', Unit=key ) }}"><button type="button" class="btn btn-primary">Chart</button></a>      
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-left: 55%;">
+                    Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <script>
+    function filter() {
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("myInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("myTable");
+      tr = table.getElementsByTagName("tr");
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }       
+      }
+    }
+</script> -->
+{% endblock %}
+
+
+
