@@ -1,9 +1,10 @@
-flask
-flask_wtf
-flask_bootstrap
-wtforms
-requests
-tensorflow
+Flask==1.1.1
+Flask-WTF==0.14.3
+Flask-Bootstrap=3.3.7.1
+requests==2.23.0
 pandas
-numpy
+APScheduler
+--no-cache-dir tensorflow
+gunicorn
+
 
