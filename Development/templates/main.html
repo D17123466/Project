@@ -1,0 +1,29 @@
+{% import "bootstrap/wtf.html" as wtf %}
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>FYP - Prediction of currency exchange rate</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/Chart.bundle.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/moment.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/vue.js') }}"></script>  
+</head>
+<body>
+  <div class="jumbotron text-center" style="margin-bottom:0">
+    <h1>Currency Exchange Rate</h1>
+    <p>D17123466 - Seungki Jeong</p>
+  </div>
+      {% block content %}
+      {% endblock %}
+  </div>
+</body>
+</html>
+
+
