@@ -10,7 +10,7 @@
       <button v-else v-on:click='isActive = !isActive' id="removeData" type="button" class="btn btn-primary">Drop Prediction</button>
     </div> -->
     <p>
-    <button id="addData" type="button" class="btn btn-primary">Add Prediction</button>
+    <button id="addData" type="button" class="btn btn-primary" method="POST">Add Prediction</button>
     <button id="removeData" type="button" class="btn btn-primary">Drop Prediction</button>
     <a href="{{ url_for('main') }}"><button type="button" class="btn btn-primary">Return</button></a>
     </p>

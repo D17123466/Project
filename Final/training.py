@@ -40,6 +40,6 @@ for unit in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK
 
     executeTrain(lstm_model, X_train, y_train, iterations)
 
-    # evaluateModel(lstm_model, X_test, y_test)
+    evaluateModel(lstm_model, X_test, y_test)
 
     saveTrainedModel(lstm_model, 'model_' + unit)
