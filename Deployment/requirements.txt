@@ -4,7 +4,6 @@ Flask-Bootstrap==3.3.7.1
 requests==2.23.0
 pandas==1.0.3
 APScheduler==3.6.3
---no-cache-dir tensorflow
 gunicorn==20.0.4
-
+tensorflow==2.1.0
 
