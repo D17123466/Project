@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>FYP - Prediction of currency exchange rate</title>
+  <title>Exchange</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
@@ -17,8 +17,7 @@
 </head>
 <body>
   <div class="jumbotron text-center" style="margin-bottom:0">
-    <h1>Currency Exchange Rate</h1>
-    <p>D17123466 - Seungki Jeong</p>
+    <h1><a href="{{ url_for('main') }}">Exchange</a></h1>  
   </div>
       {% block content %}
       {% endblock %}

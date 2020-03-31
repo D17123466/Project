@@ -72,7 +72,7 @@ def saveTrainedModel(model, model_name):
 
 
 
-def setPrediction(data, seq_length, unit):
+def setPrediction(data, seq_length, unit, latest):
     size = len(data)
     input = dict(list(data.items())[size-178:])
     input = pd.DataFrame(list(input.items()), columns=['Date', 'Rate'])
@@ -82,7 +82,7 @@ def setPrediction(data, seq_length, unit):
     input_rate = MinMaxScaler(input_rate)
     input_x, _ = build_window(input_rate, seq_length)
     model = loadTrainedModel('model_' + unit)
-    results = getPrediction(model, input_x, input_max, input_min)
+    results = getPrediction(model, input_x, input_max, input_min, latest)
     return results
 
 
@@ -91,8 +91,11 @@ def loadTrainedModel(model_name):
     return model
 
 
-def getPrediction(model, predict_input, rate_max, rate_min):
-    predict_start = (datetime.today() + timedelta(days=0)).date()
+# The reference rates are usually updated around 16:00 CET on every working day, except on TARGET closing days. 
+# They are based on a regular daily concertation procedure between central banks across Europe, which normally takes place at 14:15 CET.
+def getPrediction(model, predict_input, rate_max, rate_min, latest):
+    # predict_start = (datetime.today() + timedelta(days=1)).date()
+    predict_start = (datetime.strptime(latest, '%Y-%m-%d') + timedelta(days=1)).date()
     predict_end = (datetime.today() + timedelta(days=180)).date()
     days = (predict_end-predict_start).days + 1
     dates = [predict_start + timedelta(days=x) for x in range(days)]
@@ -179,3 +182,4 @@ def execMainTask():
 
         # Step 9. Save the trained model
         saveTrainedModel(lstm_model, 'model_' + unit)
+

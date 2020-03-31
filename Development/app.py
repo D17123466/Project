@@ -22,9 +22,6 @@ app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'D17123466'
 Bootstrap(app)
 
-# Configure Job Scheduler kicking off the task updating the trained LSTM model
-setJobScheduler()
-
 # Currency Converter & Rates
 @app.route('/', methods=['GET', 'POST'])
 def main():
@@ -40,12 +37,14 @@ def main():
     unit_base = json['base']
 
     # Set the date when the dataset is updated
-    date_updated = datetime.strptime(json['date'], "%Y-%m-%d").date().strftime("%d / %b / %Y")
+    global latest
+    latest = json['date']
+    date_updated = datetime.strptime(latest, "%Y-%m-%d").date().strftime("%d / %b / %Y")
 
     # Set dictionary {key:value} as date and currency rate respectively
     # Most traded currencies by value
     json_rate = json['rates'].items()
-    rates = [(key, value)  for key, value in json_rate if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
+    rates = [(key, '{:,.2f}'.format(value)) for key, value in json_rate if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
     rates = rates[::-1]
 
     # In case of normal
@@ -64,9 +63,9 @@ def main():
             URL = URL_DEFAULT + '?base=' + from_
             response = requests.get(URL)
             json = response.json()
-            result = float(json['rates'][to_] * float(amount))
+            result = '{:,.2f}'.format(float(json['rates'][to_] * float(amount)))
         else:
-            result = float(amount)
+            result = '{:,.2f}'.format(float(amount))
 
         return render_template('basic.html', amount=amount, result=result, from_=from_, to_=to_, form=form, unit_base=unit_base, date_updated=date_updated, rates=rates)
 
@@ -79,8 +78,9 @@ def chart():
 
     # Set start date and end date
     start_at = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
-    end_at = datetime.today().strftime("%Y-%m-%d")
-
+    end_at = latest
+    # end_at = datetime.today().strftime("%Y-%m-%d")
+    
     # Set URL to request historical dataset
     URL = URL_HISTORY + '?start_at=' + start_at + '&end_at=' + end_at
 
@@ -97,7 +97,7 @@ def chart():
         rates[d] = float(value[unit])
 
     # Get Prediction
-    results = setPrediction(rates, 50, unit)
+    results = setPrediction(rates, 50, unit, latest)
 
     if request.method == 'GET':
         return render_template('chart.html', rates=rates, unit=unit, results=results)
@@ -105,3 +105,10 @@ def chart():
     if request.method == 'POST':
         return render_template('chart.html', rates=rates, unit=unit, results=results)      
         
+
+
+if __name__=='__main__':
+    # Configure Job Scheduler kicking off the task updating the trained LSTM model
+    setJobScheduler()
+    app.run(host='0.0.0.0')
+    
