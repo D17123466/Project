@@ -22,10 +22,6 @@ app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'D17123466'
 Bootstrap(app)
 
-# Run Flask 
-if __name__=='__main__':
-    app.run(debug=True, host='0.0.0.0')
-
 # Configure Job Scheduler kicking off the task updating the trained LSTM model
 setJobScheduler()
 
@@ -109,4 +105,10 @@ def chart():
     if request.method == 'POST':
         return render_template('chart.html', rates=rates, unit=unit, results=results)      
         
+
+
+# Run Flask 
+if __name__=='__main__':
+    app.run(debug=True, host='0.0.0.0')
+
 

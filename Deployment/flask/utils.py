@@ -179,3 +179,6 @@ def execMainTask():
 
         # Step 9. Save the trained model
         saveTrainedModel(lstm_model, 'model_' + unit)
+
+
+
