@@ -4,14 +4,27 @@ import pandas as pd
 import requests
 from datetime import datetime, timedelta 
 from apscheduler.schedulers.background import BackgroundScheduler
+from sklearn.preprocessing import MinMaxScaler
+
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
 CURRENCY_BASE = 'EUR'
 CURRENCIES = ['KRW', 'GBP', 'USD', 'NZD', 'CNY', 'CHF', 'JPY', 'SEK', 'AUD', 'HKD', 'CAD']
 
+SEQ_LENGTH = 50             # Sequence length          
+INPUT_DIM = 1               # Dimension of input value
+OUTPUT_DIM = 1              # Dimension of output value
+LEARNING_RATE = 0.01        # Learning rate
+ITERATIONS = 20             # Epoch
+PREDICTION_LENGTH = 128
+
+
+
 # MongoDB - Async
 def updateMongoDB(collection, URL, START_AT, END_AT):
-    ''' Update Database '''
+    ''' 
+    Update Database 
+    '''
     collection.remove({'$or':[{'Date':{'$lt':START_AT}}, {'Date':{'$gt':END_AT}}]})
     DATE = requests.get(URL).json()['date']
     RATES = requests.get(URL).json()['rates']
@@ -27,7 +40,9 @@ def updateMongoDB(collection, URL, START_AT, END_AT):
 
 
 def insertMongoDB(collection, URL):
-    ''' Insert Database '''
+    ''' 
+    Insert Database 
+    '''
     JSON = requests.get(URL).json()['rates'].items()
     for date, rates in sorted(JSON):
         LIST={}
@@ -42,15 +57,18 @@ def insertMongoDB(collection, URL):
 
 
 def asyncMongoDB(collection):
-    ''' Async Database '''
+    ''' 
+    Async Database 
+    '''
     # URLs for latest rates and historical rates
     URL_LATEST = URL_DEFAULT + 'latest'
     URL_HISTORY = URL_DEFAULT + 'history'
-    START_AT = (datetime.today() - timedelta(days=365*5)).strftime("%Y-%m-%d")
-    END_AT = requests.get(URL_LATEST).json()['date']
+    START_AT, END_AT = setPeriod(collection, 5)
+    LATEST = requests.get(URL_LATEST).json()['date']
+    print(START_AT, END_AT)
     URL_HISTORY = URL_HISTORY + '?start_at=' + START_AT + '&end_at=' + END_AT
     IsEmpty= True if collection.count_documents({}) == 0 else False
-    IsInvalid = True if collection.count_documents({'$or':[{'Date':{'$lt':START_AT}}, {'Date':{'$gt':END_AT}}]}) != 0 else False
+    IsInvalid = True if END_AT != LATEST else False
     if IsEmpty:
         print('MongoDB: INSERT ')
         insertMongoDB(collection, URL_HISTORY)
@@ -63,7 +81,9 @@ def asyncMongoDB(collection):
 
 # Currency Conversion - Computation
 def getConversion(from_, to_, amount):
-    ''' Compute Conversion '''
+    ''' 
+    Computation of Conversion 
+    '''
     if from_ != to_:
         URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
         JSON = requests.get(URL_BASE).json()
@@ -75,7 +95,9 @@ def getConversion(from_, to_, amount):
 
 # WTForm - SelectField List
 def getSelectFieldForm():
-    ''' Get SelectField Choices '''
+    ''' 
+    Extraction of SelectField'Choices
+    '''
     URL_LATEST = URL_DEFAULT + 'latest'
     JSON = requests.get(URL_LATEST).json()
     CHOICES = [(key, key) for key in JSON['rates'] if key in CURRENCIES]
@@ -84,196 +106,176 @@ def getSelectFieldForm():
     return CHOICES
 
 
-# Line Chart - Historical 
-def getChart(collection, CURRENCY_SELECTED):
-    ''' Get Historical Dataset for a Line Chart '''
-    START_AT = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+# Period
+def setPeriod(collection, YEAR):
+    """
+    Configuration of start point and end point for period
+    """
+    START_AT = (datetime.today() - timedelta(days=365*YEAR)).strftime("%Y-%m-%d")
     END_AT = collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date']
+    return START_AT, END_AT
+
+
+# Historical Dataset
+def getHistorical(collection, CURRENCY_SELECTED, YEAR):
+    ''' 
+    Extraction of the historical dataset from N year(s) ago 
+    '''
+    START_AT, END_AT = setPeriod(collection, YEAR)
     LIST = {}
-    for key in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
-        d = datetime.strptime(key['Date'], '%Y-%m-%d').date()
+    for doc in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
+        d = datetime.strptime(doc['Date'], '%Y-%m-%d').date()
         d = d.strftime('%d/%m/%Y')
-        LIST[d] = key['Rates'][CURRENCY_SELECTED]
-    return LIST, END_AT
+        LIST[d] = doc['Rates'][CURRENCY_SELECTED]
+    return LIST
 
 
+# Data Type - Conversion to Array
+def getConvertToArray(DATASET):
+    """
+    Conversion of data type from DataFrame to Array
+    """
+    return np.array(DATASET.loc[:, ['Rate']].values)
 
 
+# Sliding Window
+def buildSlidingWindow(TIME_SERIES, SEQ_LENGTH):
+    '''
+    Build Sliding Windows
+        - 50 Timesteps
+        - Each X is a predicted value learned based on each window that has 50 Timesteps
+        - The integration of all X's is a prediction dataset
+        - e.g. Simple figure
 
-# Obtain dataset from external source
-def getHistoricalDataset(url, unit):
-    response = requests.get(url)
-    json = response.json()
-    json = json['rates'].items()
-    rates = {}
-    for key, value in sorted(json):
-        rates[key] = value[unit]
-    dataset = pd.DataFrame(list(rates.items()), columns=['Date', 'Rate'])
-    return dataset
+         =============X
+          =============X
+           =============X
+        
+                   .
+                       .
+                           .
+                               .
+        
+                           =============X
+                            =============X
+                             =============X
 
-
-# Convert only rate data from the dataset to array datatype 
-def getConvertToArray(dataset):
-    dataset_rate = np.array(dataset.loc[:, ['Rate']].values)
-    return dataset_rate
-
-
-def getTrainTestSplit(dataset, size, seq_length):
-    train_size = int(len(dataset)*size)
-    train_set = dataset[0:train_size]
-    test_set = dataset[train_size-seq_length:]
-    return train_set, test_set
-
-
-# Normalization
-def MinMaxScaler(data):
-    return (data - np.min(data, 0)) / (np.max(data, 0) - np.min(data, 0))
-    # return numerator / (denominator + 1e-7)
-
-
-# build the dataset method
-def build_window(time_series, seq_length):
-    x = []
+    '''
+    X = []
     y = []
-    for i in range(0, len(time_series) - seq_length):
-        _x = time_series[i:i + seq_length,:]
-        _y = time_series[i + seq_length, [-1]]
-        x.append(_x)
-        y.append(_y)
-    return np.array(x), np.array(y)
+    for i in range(0, len(TIME_SERIES) - SEQ_LENGTH):
+        X.append(TIME_SERIES[i:i + SEQ_LENGTH,:])
+        y.append(TIME_SERIES[i + SEQ_LENGTH, [-1]])
+    return np.array(X), np.array(y)
 
 
-def getModel(input_dim, output_dim, seq_length, learning_rate):
-    tf.model = tf.keras.Sequential()
-    tf.model.add(tf.keras.layers.LSTM(units=1, input_shape=(seq_length, input_dim)))
-    tf.model.add(tf.keras.layers.Dense(units=output_dim, activation='tanh'))
-    tf.model.summary()
-    tf.model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(lr=learning_rate), metrics=['accuracy'])
-    return tf.model
-
-
-def execTrain(model, X_train, y_train, iterations):
-    model.fit(X_train, y_train, epochs=iterations)
-
-
-def evaluateModel(model, X_train, y_train):
-    score = model.evaluate(X_train, y_train, verbose=0)
-    print('Train Accuracy: ', score[1]*100)
-
-
-def saveTrainedModel(model, model_name):
-    model.save('./models/' + model_name + '.h5')
-
-
-
-def setPrediction(data, seq_length, unit, latest):
-    size = len(data)
-    input = dict(list(data.items())[size-178:])
-    input = pd.DataFrame(list(input.items()), columns=['Date', 'Rate'])
-    input_rate = getConvertToArray(input)
-    input_max = np.max(input_rate, 0)
-    input_min = np.min(input_rate, 0)
-    input_rate = MinMaxScaler(input_rate)
-    input_x, _ = build_window(input_rate, seq_length)
-    model = loadTrainedModel('model_' + unit)
-    results = getPrediction(model, input_x, input_max, input_min, latest)
-    return results
-
-
-def loadTrainedModel(model_name):
-    model = tf.keras.models.load_model('./models/' + model_name  + '.h5')
-    return model
-
-
-# The reference rates are usually updated around 16:00 CET on every working day, except on TARGET closing days. 
-# They are based on a regular daily concertation procedure between central banks across Europe, which normally takes place at 14:15 CET.
-def getPrediction(model, predict_input, rate_max, rate_min, latest):
-    # predict_start = (datetime.today() + timedelta(days=1)).date()
-    predict_start = (datetime.strptime(latest, '%Y-%m-%d') + timedelta(days=1)).date()
-    predict_end = (datetime.today() + timedelta(days=180)).date()
-    days = (predict_end-predict_start).days + 1
-    dates = [predict_start + timedelta(days=x) for x in range(days)]
-    date = []
-    for d in dates:
-        if not d.isoweekday() in (6, 7):
-            date.append(d.strftime('%Y-%m-%d'))
-        if len(date) == 128:
+# Predictive Dataset
+def getPrediction(collection, LIST, CURRENCY_SELECTED):
+    '''
+    Extraction of the predictive dataset
+    '''
+    INPUT = dict(list(LIST.items())[len(LIST) - PREDICTION_LENGTH - SEQ_LENGTH:])
+    INPUT = pd.DataFrame(list(INPUT.items()), columns=['Date', 'Rate'])
+    INPUT_ARRAY = getConvertToArray(INPUT)
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    INPUT_SCALED = scaler.fit_transform(INPUT_ARRAY)
+    INPUT_X, _ = buildSlidingWindow(INPUT_SCALED, SEQ_LENGTH)
+    LSTM = tf.keras.models.load_model('./models/model_' + CURRENCY_SELECTED  + '.h5')
+    PREDICTION_START_AT = (datetime.strptime(setPeriod(collection, 1)[1], '%Y-%m-%d') + timedelta(days=1)).date()
+    PREDICTION_END_AT = (datetime.today() + timedelta(days=180)).date()
+    DAYS = (PREDICTION_END_AT - PREDICTION_START_AT).days + 1
+    DATE = [PREDICTION_START_AT + timedelta(days=d) for d in range(DAYS)]
+    DATE_WORKING = []
+    for d in DATE:
+        if not d.isoweekday() in [6, 7]:
+            DATE_WORKING.append(d.strftime('%Y-%m-%d'))
+        if len(DATE_WORKING) == PREDICTION_LENGTH:
             break
-    predict = model.predict(predict_input)
-    predict_actual = ActualScaler(predict, rate_max, rate_min)
-    results = {}
-    for i in range(0, len(predict_actual)):
-        d = datetime.strptime(date[i], '%Y-%m-%d').date()
+    PREDICTION = LSTM.predict(INPUT_X)
+    PREDICTION_ACTUAL = scaler.inverse_transform(PREDICTION)
+    RESULT = {}
+    for i in range(0, len(PREDICTION_ACTUAL)):
+        d = datetime.strptime(DATE_WORKING[i], '%Y-%m-%d').date()
         d = d.strftime('%d/%m/%Y')
-        results[d] = float((predict_actual.item(i)))
-    return results
+        RESULT[d] = float(PREDICTION_ACTUAL.item(i))
+    return RESULT
 
 
-# Revert Normalized data to actual data
-def ActualScaler(data, rate_max, rate_min):
-    return data * (rate_max - rate_min) + rate_min
-
-
-# Set job scheduler 
-# Run task every at 01:00 am 
-def setJobScheduler():
-    print('\nConfiguration - Job Scheduler\n')
+# Job Scheduler  
+def setJobScheduler(collection):
+    '''
+    Configuration of a job running every 1:00 am on background
+    '''
+    print('Job Scheduler - Configured\n')
     scheduler = BackgroundScheduler()
-    scheduler.add_job(execMainTask, 'cron', hour='1', id='flask_scheduler')
-    scheduler.start()
+    scheduler.add_job(execLearning, 'cron', hour='1', minute='00', id='flask_scheduler_id', args=(collection,))
+    # scheduler.add_job(execLearning, 'cron', hour='23', minute='36', id='flask_scheduler', args=(collection,))
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
 
 
-# Set main task
-def execMainTask():
-    print('\nTrigger - execMainTask() at ', datetime.today(), '\n')
-    # URL for historical rates
-    URL_HISTORY = 'https://api.exchangeratesapi.io/history'
+# Learning
+def execLearning(collection):
+    ''' 
+    Learning LSTM models for most traded currencies by value
+    This func will be only executed at a specific time by trigger of Job Scheduler
+    '''
+    for cur in CURRENCIES:
+        print('\n=============================================')
+        print('Learning - ', cur, ' model')
+        print('=============================================')
+        LIST = getHistorical(collection, cur, 10)
+        DATASET = pd.DataFrame(list(LIST.items()), columns=['Date', 'Rate'])
+        DATASET_ARRAY = getConvertToArray(DATASET)
+        TRAIN_SIZE = int(len(DATASET_ARRAY)*0.9)
+        TRAIN_SET =DATASET_ARRAY[0:TRAIN_SIZE]
+        TEST_SET = DATASET_ARRAY[TRAIN_SIZE-SEQ_LENGTH:]
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        TRAIN_SET_SCALED = scaler.fit_transform(TRAIN_SET)
+        TEST_SET_SCALED = scaler.fit_transform(TEST_SET)
+        X_train, y_train = buildSlidingWindow(TRAIN_SET_SCALED, SEQ_LENGTH)
+        X_test, y_test = buildSlidingWindow(TEST_SET_SCALED, SEQ_LENGTH)
+        tf.model = tf.keras.Sequential()
+        tf.model.add(tf.keras.layers.LSTM(units=1, input_shape=(SEQ_LENGTH, INPUT_DIM)))
+        tf.model.add(tf.keras.layers.Dense(units=OUTPUT_DIM, activation='tanh'))
+        tf.model.summary()
+        tf.model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(lr=LEARNING_RATE), metrics=['accuracy'])
+        tf.model.fit(X_train, y_train, epochs=ITERATIONS)
+        # SCORE = tf.model.evaluate(X_train, y_train, verbose=0)
+        # print('Train Accuracy: ', SCORE[1]*100)
+        tf.model.save('./models/model_' + cur + '.h5')
+    print('\nLearning - Completed')
 
-    # Set dataset for the amount of 5 years
-    start_at = (datetime.today() - timedelta(days=365*5)).strftime("%Y-%m-%d")
-    end_at = datetime.today().strftime("%Y-%m-%d")
 
-    # Set URL
-    URL = URL_HISTORY + '?start_at=' + start_at + '&end_at=' + end_at
 
-    # Train parameters
-    seq_length = 50        # Sequence length
-    input_dim = 1          # Dimension of input value
-    output_dim = 1         # Dimension of output value
-    learning_rate = 0.01   # Learning rate
-    iterations = 20        # Epoch
-    size = 0.9             # The portion of the dataset to in the train split
+        # # Step 1. Historical dataset 
+        # dataset = getHistoricalDataset(URL, unit)
 
-    # Most traded currencies by value
-    for unit in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']:
-        print('\nTraining - ', unit, '\n')
+        # # Step 2. Convert datatype to array 
+        # dataset_rate = getConvertToArray(dataset)
 
-        # Step 1. Historical dataset 
-        dataset = getHistoricalDataset(URL, unit)
+        # # Step 3. Split a train dataset and test dataset
+        # train_set, test_set = getTrainTestSplit(dataset_rate, size, seq_length)
 
-        # Step 2. Convert datatype to array 
-        dataset_rate = getConvertToArray(dataset)
+        # # Step 4. Normalization
+        # train_set = MinMaxScaler(train_set)
+        # test_set = MinMaxScaler(test_set)
 
-        # Step 3. Split a train dataset and test dataset
-        train_set, test_set = getTrainTestSplit(dataset_rate, size, seq_length)
+        # # Step 5. Build a sliding window
+        # X_train, y_train = build_window(train_set, seq_length)
+        # X_test, y_test = build_window(test_set, seq_length)
 
-        # Step 4. Normalization
-        train_set = MinMaxScaler(train_set)
-        test_set = MinMaxScaler(test_set)
+        # # Step 6. Configure a LSTM model
+        # lstm_model = getModel(input_dim, output_dim, seq_length, learning_rate)
 
-        # Step 5. Build a sliding window
-        X_train, y_train = build_window(train_set, seq_length)
-        X_test, y_test = build_window(test_set, seq_length)
+        # # Step 7. Training
+        # execTrain(lstm_model, X_train, y_train, iterations)
 
-        # Step 6. Configure a LSTM model
-        lstm_model = getModel(input_dim, output_dim, seq_length, learning_rate)
+        # # Step 8. Evaluation
+        # evaluateModel(lstm_model, X_test, y_test)
 
-        # Step 7. Training
-        execTrain(lstm_model, X_train, y_train, iterations)
-
-        # Step 8. Evaluation
-        evaluateModel(lstm_model, X_test, y_test)
-
-        # Step 9. Save the trained model
-        saveTrainedModel(lstm_model, 'model_' + unit)
+        # # Step 9. Save the trained model
+        # saveTrainedModel(lstm_model, 'model_' + unit)
 
