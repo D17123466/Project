@@ -5,6 +5,100 @@ import requests
 from datetime import datetime, timedelta 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+URL_DEFAULT = 'https://api.exchangeratesapi.io/'
+CURRENCY_BASE = 'EUR'
+CURRENCIES = ['KRW', 'GBP', 'USD', 'NZD', 'CNY', 'CHF', 'JPY', 'SEK', 'AUD', 'HKD', 'CAD']
+
+# MongoDB - Async
+def updateMongoDB(collection, URL, START_AT, END_AT):
+    ''' Update Database '''
+    collection.remove({'$or':[{'Date':{'$lt':START_AT}}, {'Date':{'$gt':END_AT}}]})
+    DATE = requests.get(URL).json()['date']
+    RATES = requests.get(URL).json()['rates']
+    LIST={}
+    for cur in CURRENCIES:
+        if cur in ['KRW', 'JPY']:
+            # LIST[cur] = '{:,.2f}'.format(RATES[cur])
+            LIST[cur] = RATES[cur]
+        else:
+            # LIST[cur] = '{:,.4f}'.format(RATES[cur])
+            LIST[cur] = RATES[cur]
+    collection.insert_one({'Date':DATE, 'Rates':LIST})  
+
+
+def insertMongoDB(collection, URL):
+    ''' Insert Database '''
+    JSON = requests.get(URL).json()['rates'].items()
+    for date, rates in sorted(JSON):
+        LIST={}
+        for cur in CURRENCIES:
+            if cur in ['KRW', 'JPY']:
+                # LIST[cur] = '{:,.2f}'.format(rates[cur])
+                LIST[cur] = rates[cur]
+            else:
+                # LIST[cur] = '{:,.4f}'.format(rates[cur])
+                LIST[cur] = rates[cur]
+        collection.insert_one({'Date':date, 'Rates': LIST})
+
+
+def asyncMongoDB(collection):
+    ''' Async Database '''
+    # URLs for latest rates and historical rates
+    URL_LATEST = URL_DEFAULT + 'latest'
+    URL_HISTORY = URL_DEFAULT + 'history'
+    START_AT = (datetime.today() - timedelta(days=365*5)).strftime("%Y-%m-%d")
+    END_AT = requests.get(URL_LATEST).json()['date']
+    URL_HISTORY = URL_HISTORY + '?start_at=' + START_AT + '&end_at=' + END_AT
+    IsEmpty= True if collection.count_documents({}) == 0 else False
+    IsInvalid = True if collection.count_documents({'$or':[{'Date':{'$lt':START_AT}}, {'Date':{'$gt':END_AT}}]}) != 0 else False
+    if IsEmpty:
+        print('MongoDB: INSERT ')
+        insertMongoDB(collection, URL_HISTORY)
+    elif IsInvalid:
+        print('MongoDB: UPDATE')
+        updateMongoDB(collection, URL_LATEST, START_AT, END_AT)
+    else:
+        print('MongoDB: UP-TO-DATE')
+
+
+# Currency Conversion - Computation
+def getConversion(from_, to_, amount):
+    ''' Compute Conversion '''
+    if from_ != to_:
+        URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
+        JSON = requests.get(URL_BASE).json()
+        RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"
+    else:
+        RESULT = f"{float(amount):,}"
+    return RESULT
+
+
+# WTForm - SelectField List
+def getSelectFieldForm():
+    ''' Get SelectField Choices '''
+    URL_LATEST = URL_DEFAULT + 'latest'
+    JSON = requests.get(URL_LATEST).json()
+    CHOICES = [(key, key) for key in JSON['rates'] if key in CURRENCIES]
+    CHOICES.append((CURRENCY_BASE, CURRENCY_BASE))
+    CHOICES = CHOICES[::-1]
+    return CHOICES
+
+
+# Line Chart - Historical 
+def getChart(collection, CURRENCY_SELECTED):
+    ''' Get Historical Dataset for a Line Chart '''
+    START_AT = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+    END_AT = collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date']
+    LIST = {}
+    for key in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
+        d = datetime.strptime(key['Date'], '%Y-%m-%d').date()
+        d = d.strftime('%d/%m/%Y')
+        LIST[d] = key['Rates'][CURRENCY_SELECTED]
+    return LIST, END_AT
+
+
+
+
 
 # Obtain dataset from external source
 def getHistoricalDataset(url, unit):

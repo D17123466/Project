@@ -3,24 +3,27 @@ import requests
 from form import ConverterForm
 from flask_bootstrap import Bootstrap
 from datetime import datetime, timedelta
-from utils import loadTrainedModel, build_window, getConvertToArray, MinMaxScaler, ActualScaler, getPrediction, setPrediction, setJobScheduler
+from utils import *
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import os 
+from flask_pymongo import PyMongo
 
-
-# Ignore tensorflow warning messages
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-# URLs for latest rates and historical rates
-URL_DEFAULT = 'https://api.exchangeratesapi.io/latest'
-URL_HISTORY = 'https://api.exchangeratesapi.io/history'
 
 # Configure Flask
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'D17123466'
 Bootstrap(app)
+
+# Solution for tensorflow warning messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+# MongoDB
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/ExchangeDB'
+mongo = PyMongo(app)
+collection = mongo.db.currency
+asyncMongoDB(collection)
 
 # Currency Converter & Rates
 @app.route('/', methods=['GET', 'POST'])
@@ -29,81 +32,82 @@ def main():
     form = ConverterForm()
 
     # Get dataset via URL
-    URL = URL_DEFAULT
-    response = requests.get(URL)
-    json = response.json()
+    # URL = URL_DEFAULT
+    # response = requests.get(URL)
+    # json = response.json()
 
     # Set EUR as base currency
-    unit_base = json['base']
+    # unit_base = json['base']
+    # unit_base = CURRENCY_BASE
 
     # Set the date when the dataset is updated
-    global latest
-    latest = json['date']
-    date_updated = datetime.strptime(latest, "%Y-%m-%d").date().strftime("%d / %b / %Y")
+    # global latest
+    # latest = json['date']
+    # date_updated = datetime.strptime(latest, "%Y-%m-%d").date().strftime("%d / %b / %Y")
+
+    DATE_UPDATED = datetime.strptime(collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date'], "%Y-%m-%d").date().strftime("%d / %b / %Y")
 
     # Set dictionary {key:value} as date and currency rate respectively
     # Most traded currencies by value
-    json_rate = json['rates'].items()
-    rates = [(key, '{:,.2f}'.format(value)) for key, value in json_rate if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
-    rates = rates[::-1]
+    # json_rate = json['rates'].items()
+    # rates = [(key, '{:,.2f}'.format(value)) for key, value in json_rate if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
+    # rates = rates[::-1]
+    LIST = [(cur, rates) for cur, rates in collection.find({}, {'_id':0, 'Rates':1}).sort([('_id', -1)]).limit(1).next()['Rates'].items()]
 
     # In case of normal
     if request.method == 'GET':
-        return render_template('basic.html', form=form, unit_base=unit_base, date_updated=date_updated, rates=rates)
+        return render_template('basic.html', form=form, CURRENCY_BASE=CURRENCY_BASE, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
 
     # In case of mapping the calculated result to currency converter form
     if request.method == 'POST':
         # Get 3 components by a user
-        amount = request.form['amount']
-        from_ = request.form['from_']
-        to_ = request.form['to_']
-
-        # Compute the result of conversion between two pair
-        if from_ != 'EUR' or to_ !='EUR':
-            URL = URL_DEFAULT + '?base=' + from_
-            response = requests.get(URL)
-            json = response.json()
-            result = '{:,.2f}'.format(float(json['rates'][to_] * float(amount)))
-        else:
-            result = '{:,.2f}'.format(float(amount))
-
-        return render_template('basic.html', amount=amount, result=result, from_=from_, to_=to_, form=form, unit_base=unit_base, date_updated=date_updated, rates=rates)
+        AMOUNT = request.form['amount']
+        FROM = request.form['from_']
+        TO = request.form['to_']
+        RESULT = getConversion(FROM, TO, AMOUNT)
+        return render_template('basic.html', AMOUNT=AMOUNT, RESULT=RESULT, FROM=FROM, TO=TO, form=form, CURRENCY_BASE=CURRENCY_BASE, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
 
 
 # Chart displaying historical currency rates
 @app.route('/Chart', methods=['GET', 'POST'])
 def chart():
+
+
     # Set the selected currency
-    unit = request.args['Unit']
+    CURRENCY_SELECTED = request.args['Unit']
+    LIST, END_AT = getChart(collection, CURRENCY_SELECTED)
 
     # Set start date and end date
-    start_at = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
-    end_at = latest
-    # end_at = datetime.today().strftime("%Y-%m-%d")
+    # start_at = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+    # end_at = END_AT
+    # # end_at = datetime.today().strftime("%Y-%m-%d")
     
-    # Set URL to request historical dataset
-    URL = URL_HISTORY + '?start_at=' + start_at + '&end_at=' + end_at
+    # # Set URL to request historical dataset
+    # URL = URL_DEFAULT + 'history' + '?start_at=' + start_at + '&end_at=' + end_at
 
-    # Get dataset via URL
-    response = requests.get(URL)
-    json = response.json()
-    json = json['rates'].items()
+    # # Get dataset via URL
+    # response = requests.get(URL)
+    # json = response.json()
+    # json = json['rates'].items()
 
-    # Set dictionary {key:value} as date and currency rate respectively
-    rates = {}
-    for key, value in sorted(json):
-        d = datetime.strptime(key, '%Y-%m-%d').date()
-        d = d.strftime('%d/%m/%Y')
-        rates[d] = float(value[unit])
+    # # Set dictionary {key:value} as date and currency rate respectively
+    # rates = {}
+    # for key, value in sorted(json):
+    #     d = datetime.strptime(key, '%Y-%m-%d').date()
+    #     d = d.strftime('%d/%m/%Y')
+    #     rates[d] = float(value[unit])
+
+    # print(rates)
+
 
     # Get Prediction
-    results = setPrediction(rates, 50, unit, latest)
+    RESULT = setPrediction(LIST, 50, CURRENCY_SELECTED, END_AT)
 
     if request.method == 'GET':
-        return render_template('chart.html', rates=rates, unit=unit, results=results)
+        return render_template('chart.html', rates=LIST, unit=CURRENCY_SELECTED, results=RESULT)
         
     if request.method == 'POST':
-        return render_template('chart.html', rates=rates, unit=unit, results=results)      
+        return render_template('chart.html', rates=LIST, unit=CURRENCY_SELECTED, results=RESULT)
         
 
 
@@ -111,4 +115,3 @@ if __name__=='__main__':
     # Configure Job Scheduler kicking off the task updating the trained LSTM model
     setJobScheduler()
     app.run(host='0.0.0.0')
-    

@@ -54,8 +54,8 @@
                         <!-- <button type="button" class="btn btn-primary">Submit</button> -->
                     </form>
                     <div style="margin-top: 5%">
-                        {% if form.is_submitted and result %}
-                        <div class="breadcrumb">{{ amount }} {{ from_ }} = {{  result  }} {{ to_ }}</div>
+                        {% if form.is_submitted and RESULT %}
+                        <div class="breadcrumb">{{ AMOUNT }} {{ FROM }} = {{  RESULT  }} {{ TO }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -68,17 +68,17 @@
                   <div style="margin-left: 40%;">
                     <div style="margin-bottom: 1%;">
                         <div class='currency'>
-                          <span>Updated ({{ date_updated }})</span>
+                          <span>Updated ({{ DATE_UPDATED }})</span>
                           <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/EUR.svg') }}"></div>
                           <div class='unit'>
-                            <p class='unit-code'>EUR</p>
+                            <p class='unit-code'>{{ CURRENCY_BASE }}</p>
                             <p class='unit-code2'>Euro</p>
                           </div> 
                         </div>
                     </div>
                   </div>
                 </div>
-                <div class='row' style="margin-top: 6%;">
+                <div class='row' style="margin-top: 5%;">
                   <!-- <input type="text" id="myInput" onkeyup="filter()" placeholder="Type for currency..."> -->
                   <table id="myTable" class="table table-bordered" style="text-align: center;" >
                       <thead>
@@ -89,7 +89,7 @@
                           </tr>
                       </thead>
                       <tbody>
-                          {% for key, value in rates %}
+                          {% for key, value in LIST %}
                           <tr>
                               {%  if key != 'EUR' %}
                                 {% if key == 'KRW' %}

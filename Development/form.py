@@ -2,17 +2,12 @@ from flask_wtf import FlaskForm
 from wtforms import FloatField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 import requests
+from utils import getSelectFieldForm
 
 class ConverterForm(FlaskForm):
-    url = 'https://api.exchangeratesapi.io/latest'
-    response = requests.get(url)
-    json = response.json()
-    rates = json['rates']
-    units = [(key, key) for key in rates if key in ['USD', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'SEK', 'KRW']]
-    units.append(('EUR', 'EUR'))
-    units = units[::-1]
+    CHOICES = getSelectFieldForm()
     amount = FloatField('Amount', validators=[DataRequired()])
-    from_ = SelectField('From',  choices=units)
-    to_ = SelectField('To',  choices=units)
+    from_ = SelectField('From',  choices=CHOICES)
+    to_ = SelectField('To',  choices=CHOICES)
     submit = SubmitField('Submit')
 
