@@ -16,14 +16,17 @@ app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = 'D17123466'
 Bootstrap(app)
 
+
 # Solution for tensorflow warning messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 # MongoDB
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/ExchangeDB'
 mongo = PyMongo(app)
 collection = mongo.db.currency
 asyncMongoDB(collection)
+
 
 # Currency Converter & Rates
 @app.route('/', methods=['GET', 'POST'])
@@ -49,11 +52,19 @@ def main():
 def chart():
     CURRENCY_SELECTED = request.args['Unit']
     LIST = getHistorical(collection, CURRENCY_SELECTED, 1)
+    LIST_2 = getHistorical(collection, CURRENCY_SELECTED, 2)
+    LIST_3 = getHistorical(collection, CURRENCY_SELECTED, 3)
+    LIST_4 = getHistorical(collection, CURRENCY_SELECTED, 4)
+    LIST_5 = getHistorical(collection, CURRENCY_SELECTED, 5)
+    # LIST_2 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 2).items() if (key, value) not in LIST.items())
+    # LIST_3 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 3).items() if (key, value) not in LIST.items())
+    # LIST_4 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 4).items() if (key, value) not in LIST.items())
+    # LIST_5 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 5).items() if (key, value) not in LIST.items())
     RESULT = getPrediction(collection, LIST, CURRENCY_SELECTED)
     if request.method == 'GET':
-        return render_template('chart.html', rates=LIST, unit=CURRENCY_SELECTED, results=RESULT)
-    # if request.method == 'POST':
-    #     return render_template('chart.html', rates=LIST, unit=CURRENCY_SELECTED, results=RESULT)
+        return render_template('chart.html', LIST=LIST, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, CURRENCY_SELECTED=CURRENCY_SELECTED, RESULT=RESULT)
+    if request.method == 'POST':
+        return render_template('chart.html', LIST=LIST, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, CURRENCY_SELECTED=CURRENCY_SELECTED, RESULT=RESULT)
 
 
 if __name__=='__main__':

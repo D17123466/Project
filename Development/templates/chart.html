@@ -3,16 +3,28 @@
 {% block content %}
 <div class="container" style="margin-top: 5%; margin-bottom: 5%;">
   <h2>Chart</h2>
+  <p id="demo"></p>
   <canvas style="margin-top: 5%;" id="chart_currency" width="400" height="200"></canvas>
-  <div style="margin-left: 60%; margin-top: 5%; margin-bottom: 5%;">
+  <div style="margin-top: 5%; margin-bottom: 5%;">
     <!-- <div id='app'>
-      <button v-if='isActive' v-on:click='isActive = !isActive' id="addData" type="button" class="btn btn-primary">Add Prediction</button>
-      <button v-else v-on:click='isActive = !isActive' id="removeData" type="button" class="btn btn-primary">Drop Prediction</button>
+      <button v-if='isActive' v-on:click='isActive = !isActive' id="addPrediction" type="button" class="btn btn-primary">Add Prediction</button>
+      <button v-else v-on:click='isActive = !isActive' id="removePrediction" type="button" class="btn btn-primary">Drop Prediction</button>
     </div> -->
     <p>
-    <button id="addData" type="button" class="btn btn-primary" method="POST">Add Prediction</button>
-    <button id="removeData" type="button" class="btn btn-primary">Drop Prediction</button>
-    <a href="{{ url_for('main') }}"><button type="button" class="btn btn-primary">Return</button></a>
+      <div class='row justify-content-end'>
+        <div class='col-sm-8'>
+          <button id="addYear1" type="button" class="btn btn-primary">1 Year</button>
+          <button id="addYear2" type="button" class="btn btn-primary">2 Year</button>
+          <button id="addYear3" type="button" class="btn btn-primary">3 Year</button>
+          <button id="addYear4" type="button" class="btn btn-primary">4 Year</button>
+          <button id="addYear5" type="button" class="btn btn-primary">5 Year</button>
+          <button id="addPrediction" type="button" class="btn btn-primary">Prediction</button>
+          <button id="dropDataset" type="button" class="btn btn-primary">Drop Dataset</button>
+        </div>
+        <div class='col-sm-2'>
+          <a href="{{ url_for('main') }}"><button type="button" class="btn btn-primary">Return</button></a>
+        </div>
+      </div>
     </p>
   </div>
 </div>
@@ -35,7 +47,7 @@
 <script>
   var timeFormat = 'DD/MM/YYYY';
   var dataPoints = [];
-  '{% for key, value in rates.items() %}'
+  '{% for key, value in LIST.items() %}'
     dataPoints.push({
       x: '{{ key }}',
       y: '{{ value }}'
@@ -45,7 +57,7 @@
       type: 'line',
       data: {
           datasets: [{
-              label: 'Historical',
+              label: 'Historical 1 Year',
               data: dataPoints,
               fill: false,
               backgroundColor: window.chartColors.blue,
@@ -60,7 +72,7 @@
         // responsive: false,
         title: {
           display: true,
-          text: 'EUR - {{ unit }}',
+          text: 'EUR - {{ CURRENCY_SELECTED }}',
           fontSize: 20,
           position: 'top',
           padding: 15,
@@ -137,21 +149,162 @@
     window.chart = new Chart(ctx, config);
   };
 
-  document.getElementById('addData').addEventListener('click', function() {
-    var dataPoints2 = [];
-    dataPoints2.push({
+  document.getElementById('addYear1').addEventListener('click', function() {
+    var dataPoints= [];
+    '{% for key, value in LIST.items() %}'
+        dataPoints.push({
+          x: '{{ key }}',
+          y: '{{ value }}'
+        })
+    '{% endfor %}'
+    var dataset = {
+      label: 'Historical 1 Year',
+      data: dataPoints,
+      fill: false,
+      backgroundColor: window.chartColors.blue,
+      borderColor: window.chartColors.blue,
+      pointRadius: 1,
+      lineTension: 0,
+      borderWidth: 2
+    }
+    if (config.data.datasets.length == 1) {
+      config.data.datasets.pop();
+    }
+    else {
+      config.data.datasets.shift();
+    }
+    config.data.datasets.unshift(dataset)
+    window.chart.update();
+  });
+
+  document.getElementById('addYear2').addEventListener('click', function() {
+    var dataPoints = [];
+    '{% for key, value in LIST_2.items() %}'
+        dataPoints.push({
+          x: '{{ key }}',
+          y: '{{ value }}'
+        })
+    '{% endfor %}'
+    var dataset = {
+      label: 'Historical 2 Year',
+      data: dataPoints,
+      fill: false,
+      backgroundColor: window.chartColors.blue,
+      borderColor: window.chartColors.blue,
+      pointRadius: 1,
+      lineTension: 0,
+      borderWidth: 2
+    }
+    if (config.data.datasets.length == 1) {
+      config.data.datasets.pop();
+    }
+    else {
+      config.data.datasets.shift();
+    }
+    config.data.datasets.unshift(dataset)
+    window.chart.update();
+  });
+
+  document.getElementById('addYear3').addEventListener('click', function() {
+    var dataPoints = [];
+    '{% for key, value in LIST_3.items() %}'
+        dataPoints.push({
+          x: '{{ key }}',
+          y: '{{ value }}'
+        })
+    '{% endfor %}'
+    var dataset = {
+      label: 'Historical 3 Year',
+      data: dataPoints,
+      fill: false,
+      backgroundColor: window.chartColors.blue,
+      borderColor: window.chartColors.blue,
+      pointRadius: 1,
+      lineTension: 0,
+      borderWidth: 2
+    }
+    if (config.data.datasets.length == 1) {
+      config.data.datasets.pop();
+    }
+    else {
+      config.data.datasets.shift();
+    }
+    config.data.datasets.unshift(dataset)
+    window.chart.update();
+  });
+
+  document.getElementById('addYear4').addEventListener('click', function() {
+    var dataPoints = [];
+    '{% for key, value in LIST_4.items() %}'
+        dataPoints.push({
+          x: '{{ key }}',
+          y: '{{ value }}'
+        })
+    '{% endfor %}'
+    var dataset = {
+      label: 'Historical 4 Year',
+      data: dataPoints,
+      fill: false,
+      backgroundColor: window.chartColors.blue,
+      borderColor: window.chartColors.blue,
+      pointRadius: 1,
+      lineTension: 0,
+      borderWidth: 2
+    }
+    if (config.data.datasets.length == 1) {
+      config.data.datasets.pop();
+    }
+    else {
+      config.data.datasets.shift();
+    }
+    config.data.datasets.unshift(dataset)
+    window.chart.update();
+  });
+
+  document.getElementById('addYear5').addEventListener('click', function() {
+    var dataPoints = [];
+    '{% for key, value in LIST_5.items() %}'
+        dataPoints.push({
+          x: '{{ key }}',
+          y: '{{ value }}'
+        })
+    '{% endfor %}'
+    var dataset = {
+      label: 'Historical 5 Year',
+      data: dataPoints,
+      fill: false,
+      backgroundColor: window.chartColors.blue,
+      borderColor: window.chartColors.blue,
+      pointRadius: 1,
+      lineTension: 0,
+      borderWidth: 2
+    }
+    if (config.data.datasets.length == 1) {
+      config.data.datasets.pop();
+    }
+    else {
+      config.data.datasets.shift();
+    }
+    config.data.datasets.unshift(dataset)
+    window.chart.update();
+  });
+
+
+  document.getElementById('addPrediction').addEventListener('click', function() {
+    var dataPoints_pred = [];
+    dataPoints_pred.push({
       x: dataPoints.slice(-1).map(({x}) => x)[0],
       y: dataPoints.slice(-1).map(({y}) => y)[0]
     })
-    '{% for key, value in results.items() %}'
-        dataPoints2.push({
+    '{% for key, value in RESULT.items() %}'
+        dataPoints_pred.push({
           x: '{{ key }}',
           y: '{{ value }}'
         })
     '{% endfor %}'
     var dataset_pred = {
       label: 'Predictive',
-      data: dataPoints2,
+      data: dataPoints_pred,
       fill: false,
       backgroundColor: window.chartColors.red,
       borderColor: window.chartColors.red,
@@ -159,12 +312,16 @@
       lineTension: 0,
       borderWidth: 2
     }
-    config.data.datasets.push(dataset_pred)
+    if (config.data.datasets.length == 1) {
+      config.data.datasets.push(dataset_pred)
+    }
     window.chart.update();
   });
 
-  document.getElementById('removeData').addEventListener('click', function() {
-    config.data.datasets.pop();
+  document.getElementById('dropDataset').addEventListener('click', function() {
+    if (config.data.datasets.length > 1) {
+      config.data.datasets.pop();
+    }
     window.chart.update();
   });
 </script>

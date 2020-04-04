@@ -8,6 +8,9 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
+URL_LATEST = URL_DEFAULT + 'latest'
+URL_HISTORY = URL_DEFAULT + 'history'
+
 CURRENCY_BASE = 'EUR'
 CURRENCIES = ['KRW', 'GBP', 'USD', 'NZD', 'CNY', 'CHF', 'JPY', 'SEK', 'AUD', 'HKD', 'CAD']
 
@@ -61,20 +64,15 @@ def asyncMongoDB(collection):
     Async Database 
     '''
     # URLs for latest rates and historical rates
-    URL_LATEST = URL_DEFAULT + 'latest'
-    URL_HISTORY = URL_DEFAULT + 'history'
-    START_AT, END_AT = setPeriod(collection, 5)
-    LATEST = requests.get(URL_LATEST).json()['date']
-    print(START_AT, END_AT)
-    URL_HISTORY = URL_HISTORY + '?start_at=' + START_AT + '&end_at=' + END_AT
+    START_AT, LATEST = setPeriod(collection, 10)
     IsEmpty= True if collection.count_documents({}) == 0 else False
-    IsInvalid = True if END_AT != LATEST else False
+    IsInvalid = True if (collection.count_documents({'Date':{'$lt':START_AT}}) != 0 or collection.count_documents({'Date':{'$eq':LATEST}}) == 0) else False
     if IsEmpty:
         print('MongoDB: INSERT ')
-        insertMongoDB(collection, URL_HISTORY)
+        insertMongoDB(collection, URL_HISTORY + '?start_at=' + START_AT + '&end_at=' + LATEST)
     elif IsInvalid:
         print('MongoDB: UPDATE')
-        updateMongoDB(collection, URL_LATEST, START_AT, END_AT)
+        updateMongoDB(collection, URL_LATEST, START_AT, LATEST)
     else:
         print('MongoDB: UP-TO-DATE')
 
@@ -98,7 +96,6 @@ def getSelectFieldForm():
     ''' 
     Extraction of SelectField'Choices
     '''
-    URL_LATEST = URL_DEFAULT + 'latest'
     JSON = requests.get(URL_LATEST).json()
     CHOICES = [(key, key) for key in JSON['rates'] if key in CURRENCIES]
     CHOICES.append((CURRENCY_BASE, CURRENCY_BASE))
@@ -109,25 +106,15 @@ def getSelectFieldForm():
 # Period
 def setPeriod(collection, YEAR):
     """
-    Configuration of start point and end point for period
+    Configuration of start point and end point from MongoDB for period
     """
     START_AT = (datetime.today() - timedelta(days=365*YEAR)).strftime("%Y-%m-%d")
-    END_AT = collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date']
-    return START_AT, END_AT
-
-
-# Historical Dataset
-def getHistorical(collection, CURRENCY_SELECTED, YEAR):
-    ''' 
-    Extraction of the historical dataset from N year(s) ago 
-    '''
-    START_AT, END_AT = setPeriod(collection, YEAR)
-    LIST = {}
-    for doc in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
-        d = datetime.strptime(doc['Date'], '%Y-%m-%d').date()
-        d = d.strftime('%d/%m/%Y')
-        LIST[d] = doc['Rates'][CURRENCY_SELECTED]
-    return LIST
+    if (collection.count_documents({}) == 0):
+        LATEST = requests.get(URL_LATEST).json()['date']
+        return START_AT, LATEST
+    else:
+        END_AT = collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date']
+        return START_AT, END_AT
 
 
 # Data Type - Conversion to Array
@@ -167,6 +154,20 @@ def buildSlidingWindow(TIME_SERIES, SEQ_LENGTH):
         X.append(TIME_SERIES[i:i + SEQ_LENGTH,:])
         y.append(TIME_SERIES[i + SEQ_LENGTH, [-1]])
     return np.array(X), np.array(y)
+
+
+# Historical Dataset
+def getHistorical(collection, CURRENCY_SELECTED, YEAR):
+    ''' 
+    Extraction of the historical dataset from N year(s) ago 
+    '''
+    START_AT, END_AT = setPeriod(collection, YEAR)
+    LIST = {}
+    for doc in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
+        d = datetime.strptime(doc['Date'], '%Y-%m-%d').date()
+        d = d.strftime('%d/%m/%Y')
+        LIST[d] = doc['Rates'][CURRENCY_SELECTED]
+    return LIST
 
 
 # Predictive Dataset
@@ -249,33 +250,4 @@ def execLearning(collection):
     print('\nLearning - Completed')
 
 
-
-        # # Step 1. Historical dataset 
-        # dataset = getHistoricalDataset(URL, unit)
-
-        # # Step 2. Convert datatype to array 
-        # dataset_rate = getConvertToArray(dataset)
-
-        # # Step 3. Split a train dataset and test dataset
-        # train_set, test_set = getTrainTestSplit(dataset_rate, size, seq_length)
-
-        # # Step 4. Normalization
-        # train_set = MinMaxScaler(train_set)
-        # test_set = MinMaxScaler(test_set)
-
-        # # Step 5. Build a sliding window
-        # X_train, y_train = build_window(train_set, seq_length)
-        # X_test, y_test = build_window(test_set, seq_length)
-
-        # # Step 6. Configure a LSTM model
-        # lstm_model = getModel(input_dim, output_dim, seq_length, learning_rate)
-
-        # # Step 7. Training
-        # execTrain(lstm_model, X_train, y_train, iterations)
-
-        # # Step 8. Evaluation
-        # evaluateModel(lstm_model, X_test, y_test)
-
-        # # Step 9. Save the trained model
-        # saveTrainedModel(lstm_model, 'model_' + unit)
 
