@@ -2,48 +2,63 @@
 {% extends 'main.html' %}
 {% block content %}
 <div class="container" style="margin-top: 5%; margin-bottom: 5%;">
-  <h2>Chart</h2>
-  <p id="demo"></p>
-  <canvas style="margin-top: 5%;" id="chart_currency" width="400" height="200"></canvas>
-  <div style="margin-top: 5%; margin-bottom: 5%;">
-    <!-- <div id='app'>
-      <button v-if='isActive' v-on:click='isActive = !isActive' id="addPrediction" type="button" class="btn btn-primary">Add Prediction</button>
-      <button v-else v-on:click='isActive = !isActive' id="removePrediction" type="button" class="btn btn-primary">Drop Prediction</button>
-    </div> -->
-    <p>
-      <div class='row justify-content-end'>
-        <div class='col-sm-8'>
-          <button id="addYear1" type="button" class="btn btn-primary">1 Year</button>
-          <button id="addYear2" type="button" class="btn btn-primary">2 Year</button>
-          <button id="addYear3" type="button" class="btn btn-primary">3 Year</button>
-          <button id="addYear4" type="button" class="btn btn-primary">4 Year</button>
-          <button id="addYear5" type="button" class="btn btn-primary">5 Year</button>
-          <button id="addPrediction" type="button" class="btn btn-primary">Prediction</button>
-          <button id="dropDataset" type="button" class="btn btn-primary">Drop Dataset</button>
-        </div>
-        <div class='col-sm-2'>
-          <a href="{{ url_for('main') }}"><button type="button" class="btn btn-primary">Return</button></a>
-        </div>
+  <div class='row'>
+    <div class='col-2'>
+      <h2><img width="70" height="35" src="{{ url_for('static', filename='icon/EUR.svg') }}">EUR</h2>
+    </div>
+    <div class='col-2'>
+      <h2><img width="70" height="35" src="../static/icon/{{ CURRENCY_SELECTED }}.svg">{{ CURRENCY_SELECTED }}</h2>
+    </div>
+    <div class='col-2 offset-6'>
+      <a href="{{ url_for('main') }}"><button type="button" class="btn button-option">Return</button></a>
+    </div>
+  </div>
+  <div class='container' style="margin-top: 5%; margin-bottom: 0%;">
+    <div class="row">
+      <div class='col'>
+        <canvas id="chart_currency" style="margin-top: 5%;" width="450" height="250"></canvas>
       </div>
-    </p>
+    </div>
+    <div class='row' style="margin-top: 5%;">
+      <div class="col-5 offset-4">
+        <button id="addYear1" type="button" class="btn button-option">1 Year</button>
+        <button id="addYear2" type="button" class="btn button-option">2 Year</button>
+        <button id="addYear3" type="button" class="btn button-option">3 Year</button>
+        <button id="addYear4" type="button" class="btn button-option">4 Year</button>
+        <button id="addYear5" type="button" class="btn button-option">5 Year</button>
+      </div>
+      <div class='col-3'>
+        <button id="addPrediction" type="button" class="btn button-option-2">Prediction</button>
+        <button id="dropDataset" type="button" class="btn button-option-2">Drop</button>
+      </div>
+    </div>
   </div>
 </div>
 <style>
-  canvas {
+  .canvas {
     -moz-user-select: none;
 		-webkit-user-select: none;
 		-ms-user-select: none;
   }
+  .button-option {
+    background-color: white; 
+    color: black;
+    border: 2px solid #008CBA;
+  }
+  .button-option:hover {
+    background-color: #008CBA;
+    color: white;
+  }
+  .button-option-2 {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #f44336;
+  }
+  .button-option-2:hover{
+    background-color: #f44336;
+    color: white;
+  }
 </style>
-<!-- <script>
-  var app = new Vue({
-      el: '#app',
-      data: {      
-          isActive: true,
-          
-      }
-  });
-</script> -->
 <script>
   var timeFormat = 'DD/MM/YYYY';
   var dataPoints = [];
@@ -57,12 +72,12 @@
       type: 'line',
       data: {
           datasets: [{
-              label: 'Historical 1 Year',
+              label: 'Historical(Y)',
               data: dataPoints,
               fill: false,
               backgroundColor: window.chartColors.blue,
               borderColor: window.chartColors.blue,
-              pointRadius: 1,
+              pointRadius: 0.7,
               lineTension: 0,
               borderWidth: 2
           }]
@@ -70,13 +85,13 @@
       // Configuration options 
       options: {
         // responsive: false,
-        title: {
-          display: true,
-          text: 'EUR - {{ CURRENCY_SELECTED }}',
-          fontSize: 20,
-          position: 'top',
-          padding: 15,
-        },
+        // title: {
+        //   display: true,
+        //   fontSize: 20,
+        //   position: 'top',
+        //   padding: 15,
+        //   text: 'Hi'
+        // },
         tooltips: {
           mode: 'nearest',
           intersect: false,
@@ -84,24 +99,9 @@
         hover: {
           mode: 'index',
         },
-        annotation: {
-        annotations: [
-          {
-            drawTime: "afterDatasetsDraw",
-            type: "line",
-            mode: "vertical",
-            scaleID: "x-axis-0",
-            value: 3.8,
-            borderWidth: 5,
-            borderColor: "red",
-            label: {
-              content: "TODAY",
-              enabled: true,
-              position: "top"
-            }
-          }
-        ]
-      },
+        animation: {
+          duration: 0
+        },
         scales: {
           xAxes: [{
             type: 'time',
@@ -121,7 +121,7 @@
             },
             scaleLabel: {
               display: true,
-              labelString: 'Date'
+              labelString: 'Time Series'
             }
           }],
           yAxes: [{
@@ -133,7 +133,7 @@
             },
             scaleLabel: {
               display: true,
-              labelString: 'Rates',
+              labelString: 'Rate',
             }
           }]
         },
@@ -158,12 +158,12 @@
         })
     '{% endfor %}'
     var dataset = {
-      label: 'Historical 1 Year',
+      label: 'Historical(Y)',
       data: dataPoints,
       fill: false,
       backgroundColor: window.chartColors.blue,
       borderColor: window.chartColors.blue,
-      pointRadius: 1,
+      pointRadius: 0.7,
       lineTension: 0,
       borderWidth: 2
     }
@@ -186,12 +186,12 @@
         })
     '{% endfor %}'
     var dataset = {
-      label: 'Historical 2 Year',
+      label: 'Historical(2Y)',
       data: dataPoints,
       fill: false,
       backgroundColor: window.chartColors.blue,
       borderColor: window.chartColors.blue,
-      pointRadius: 1,
+      pointRadius: 0.7,
       lineTension: 0,
       borderWidth: 2
     }
@@ -214,12 +214,12 @@
         })
     '{% endfor %}'
     var dataset = {
-      label: 'Historical 3 Year',
+      label: 'Historical(3Y)',
       data: dataPoints,
       fill: false,
       backgroundColor: window.chartColors.blue,
       borderColor: window.chartColors.blue,
-      pointRadius: 1,
+      pointRadius: 0.7,
       lineTension: 0,
       borderWidth: 2
     }
@@ -242,12 +242,12 @@
         })
     '{% endfor %}'
     var dataset = {
-      label: 'Historical 4 Year',
+      label: 'Historical(4Y)',
       data: dataPoints,
       fill: false,
       backgroundColor: window.chartColors.blue,
       borderColor: window.chartColors.blue,
-      pointRadius: 1,
+      pointRadius: 0.7,
       lineTension: 0,
       borderWidth: 2
     }
@@ -270,12 +270,12 @@
         })
     '{% endfor %}'
     var dataset = {
-      label: 'Historical 5 Year',
+      label: 'Historical(5Y)',
       data: dataPoints,
       fill: false,
       backgroundColor: window.chartColors.blue,
       borderColor: window.chartColors.blue,
-      pointRadius: 1,
+      pointRadius: 0.7,
       lineTension: 0,
       borderWidth: 2
     }
@@ -308,7 +308,7 @@
       fill: false,
       backgroundColor: window.chartColors.red,
       borderColor: window.chartColors.red,
-      pointRadius: 1,
+      pointRadius: 0.7,
       lineTension: 0,
       borderWidth: 2
     }

@@ -1,246 +1,120 @@
 {% extends 'main.html' %}
 {% block content %}
-<!-- <style>
-    #myInput {
-      background-position: 10px 10px;
-      background-repeat: no-repeat;
-      width: 100%;
-      font-size: 16px;
-      padding: 12px 20px 12px 40px;
-      border: 1px solid #ddd;
-      margin-bottom: 12px;
-    }
-</style> -->
 <style>
-  .currency {
-    display: flex;
-    text-align: left;
-    position: absolute;
-    padding-left: 20%;
+  .button-option {
+    background-color: white; 
+    color: black;
+    border: 2px solid #008CBA;
   }
-  .unit  {
-    display: inline-block;
-    line-height: 1.3;
+  .button-option:hover {
+    background-color: #008CBA;
+    color: white;
+  }
+  .container-currency {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    display: flex;
+    -webkit-box-align: center;
+    align-items:  center;
+    align-content: center;
   }
   .flag {
-    width: 2.8rem;
-    height: 2.8rem;
-    margin-right: 1rem;
-    align-self: center;
+    margin-right: -5px;
   }
-  .unit-code {
+  .currency  {
+    display: inline-block;
+    text-align: left;
+  }
+  .currency-code {
     display: block;
     font-size: 1.0rem;
-    font-weight: 700;
-    margin-bottom: -3px;
+    font-weight: 900;
+    margin-bottom: -1px;
   }
-  .unit-code2 {
-    font-weight: 200;
-    font-size: 0.6rem;
+  .currency-name {
+    display: block;
+    font-size: 0.4rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-bottom: -1px;
   }
 </style>
 <div class="container" style="margin-top: 5%; margin-bottom: 5%;">
     <div class="row">
-        <div class="col-sm-3">
+        <div class="col-3">
             <div class="container">
                 <h2>Converter</h2>
-                <div class="form-row">
-                    <!-- {{ wtf.quick_form(form, method="POST", role="form", form_type="horizontal") }}                 -->
-                    <form action="" method="POST" class="form" role="form" style="margin-top: 5%;">
+                <div class="row justify-content-center">
+                  <div class="form-row">
+                      <!-- {{ wtf.quick_form(form, method="POST", role="form", form_type="horizontal") }}                 -->
+                      <form action="" method="POST" class="form" role="form" style="margin-top: 5%;">
                         {{ wtf.form_field(form.amount, class='form-control', placeholder='0') }}
                         {{ wtf.form_field(form.from_, class='form-control' ) }}
                         {{ wtf.form_field(form.to_, class='form-control') }}
-                      <p><input type=submit class="btn btn-primary" style="margin-top: 5%;"></p>
-                        <!-- <button type="button" class="btn btn-primary">Submit</button> -->
-                    </form>
-                    <div style="margin-top: 5%">
-                        {% if form.is_submitted and RESULT %}
-                        <div class="breadcrumb">{{ AMOUNT }} {{ FROM }} = {{  RESULT  }} {{ TO }}</div>
-                        {% endif %}
-                    </div>
+                        <input id="converter" type="submit" class="btn button-option" style="margin-top: 5%; width: 100%;">
+                      </form>
+                  </div>
                 </div>
-            </div>
+                <div class="row justify-content-center">
+                  {% if form.is_submitted and RESULT %}
+                  <span><div id="result" class="breadcrumb" style="margin-top: 10%;"><strong>{{ AMOUNT }} {{ FROM }} = {{  RESULT  }} {{ TO }}</strong></div></span>
+                  {% endif %}
+                </div>
+            </div> 
         </div>
-        <div class="col-sm-9">
+        <div class="col-8 offset-1">
             <div class="container">
-                <h2>Rate</h2>
-                <div class='row'>
-                  <div style="margin-left: 40%;">
-                    <div style="margin-bottom: 1%;">
-                        <div class='currency'>
-                          <span>Updated ({{ DATE_UPDATED }})</span>
-                          <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/EUR.svg') }}"></div>
-                          <div class='unit'>
-                            <p class='unit-code'>{{ CURRENCY_BASE }}</p>
-                            <p class='unit-code2'>Euro</p>
-                          </div> 
-                        </div>
+              <h2>Rate</h2>
+              <div class="row justify-content-end">
+                  <span>
+                    <div class='container-currency'>
+                      <span>Updated {{ DATE_UPDATED }}</span>
+                      <div class="flag"><img width="60" height="30" src="{{ url_for('static', filename='icon/EUR.svg') }}"></div>
+                      <div class="currency">
+                        <span class='currency-code'>{{ CURRENCY_BASE }}</span>
+                        <span class="currency-name">Euro</span>                
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div class='row' style="margin-top: 5%;">
-                  <!-- <input type="text" id="myInput" onkeyup="filter()" placeholder="Type for currency..."> -->
-                  <table id="myTable" class="table table-bordered" style="text-align: center;" >
-                      <thead>
-                          <tr>
-                              <th style="width: 60%;">Currency</th>
-                              <th style="width: 25%;">Rate</th>
-                              <th style="width: 15%;">Chart</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          {% for key, value in LIST %}
-                          <tr>
-                              {%  if key != 'EUR' %}
-                                {% if key == 'KRW' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/KRW.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>South Korean won</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'GBP' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/GBP.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Pound sterling</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'AUD' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/AUD.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Australian dollar</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'CAD' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/CAD.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Canadian dollar</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'CHF' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/CHF.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Swiss franc</p>
-                                      </div>
-                                    </div>
-                                  </td>                            
-                                {% elif key == 'CNY' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/CNY.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Chinese Yuan</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'HKD' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/HKD.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Hong Kong dollar</p>
-                                      </div>
-                                    </div>
-                                  </td>                                
-                                {% elif key == 'JPY' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/JPY.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Japanese yen</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'NZD' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/NZD.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>New Zealand dollar</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'SEK' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/SEK.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>Swedish krona</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% elif key == 'USD' %}
-                                  <td>
-                                    <div class='currency'>
-                                      <div class='flag'><img width="60" height="30" src="{{ url_for('static', filename='icon/USD.svg') }}"></div>
-                                      <div class='unit'>
-                                        <p class='unit-code'>{{ key }}</p>
-                                        <p class='unit-code2'>United States dollar</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                {% endif %}
-                                <td style="font-size: 1.0rem; font-weight: 400;">{{ value }}</td>
-                              <td>
-                                  <a href="{{ url_for('chart', Unit=key ) }}"><button type="button" class="btn btn-primary">Chart</button></a>      
-                              </td>
-                              {% endif %}
-                          </tr>
-                          {% endfor %}
-                      </tbody>
+                  </span>
+              </div>
+              <div class='row' style="margin-top: 1%;">
+                <div class='col'>
+                  <table class="table table-bordered">
+                    <thead style="text-align: center;">
+                      <tr>
+                        <th style="width: 45%;">Currency</th>
+                        <th style="width: 35%;">Rate</th>
+                        <th style="width: 20%;">Chart</th>
+                      </tr>
+                    </thead>
+                    <tbody style="text-align: center; align-items: center; align-content: center; align-self: center;">
+                      {% for key, value in LIST %}
+                      <tr>
+                        <td>
+                          <div class='container-currency'>
+                            <div class="flag"><img width="60" height="30" src="../static/icon/{{ key }}.svg"></div>
+                            <div class="currency">
+                              <span class='currency-code'>{{ key }}</span>
+                              <span class="currency-name">{{ CURRENCIES_NAME[key] }}</span> 
+                            </div>
+                          </div>
+                        </td>
+                        <td>{{ value }}</td>
+                        <td><a href="{{ url_for('chart', Unit=key ) }}"><button type="button" class="btn button-option">View</button></a></td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
                   </table>
-                  <div style="margin-left: 55%;">
-                      Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
-                  </div>
                 </div>
+              </div>
+              <div class="row justify-content-end">
+                <span>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></span>
+              </div>
             </div>
         </div>
     </div>
 </div>
-<!-- <script>
-    function filter() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }       
-      }
-    }
-</script> -->
 {% endblock %}
-
-
 

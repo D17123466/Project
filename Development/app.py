@@ -34,9 +34,10 @@ def main():
     form = ConverterForm()
     DATE_UPDATED = datetime.strptime(collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date'], "%Y-%m-%d").date().strftime("%d / %b / %Y")
     LIST = [(cur, rates) for cur, rates in collection.find({}, {'_id':0, 'Rates':1}).sort([('_id', -1)]).limit(1).next()['Rates'].items()]
+    CURRENCIES_NAME = {'KRW':'South Korean won', 'GBP':'Pound sterling', 'USD':'United States dollar', 'NZD':'New Zealand dollar', 'CNY':'Chinese Yuan', 'CHF':'Swiss franc', 'JPY':'Japanese yen', 'SEK':'Swedish krona', 'AUD':'Australian dollar', 'HKD':'Hong Kong dollar', 'CAD':'Canadian dollar'}
     # In case of normal
     if request.method == 'GET':
-        return render_template('basic.html', form=form, CURRENCY_BASE=CURRENCY_BASE, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
+        return render_template('basic.html', form=form, CURRENCY_BASE=CURRENCY_BASE, CURRENCIES_NAME=CURRENCIES_NAME, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
     # In case of mapping the calculated result to currency converter form
     if request.method == 'POST':
         # Get 3 components by a user
@@ -44,7 +45,7 @@ def main():
         FROM = request.form['from_']
         TO = request.form['to_']
         RESULT = getConversion(FROM, TO, AMOUNT)
-        return render_template('basic.html', AMOUNT=AMOUNT, RESULT=RESULT, FROM=FROM, TO=TO, form=form, CURRENCY_BASE=CURRENCY_BASE, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
+        return render_template('basic.html', AMOUNT=AMOUNT, RESULT=RESULT, FROM=FROM, TO=TO, form=form, CURRENCY_BASE=CURRENCY_BASE, CURRENCIES_NAME=CURRENCIES_NAME, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
 
 
 # Chart displaying historical currency rates
