@@ -13,6 +13,7 @@ URL_HISTORY = URL_DEFAULT + 'history'
 
 CURRENCY_BASE = 'EUR'
 CURRENCIES = ['KRW', 'GBP', 'USD', 'NZD', 'CNY', 'CHF', 'JPY', 'SEK', 'AUD', 'HKD', 'CAD']
+CURRENCIES_NAME = {'KRW':'South Korean won', 'GBP':'Pound sterling', 'USD':'United States dollar', 'NZD':'New Zealand dollar', 'CNY':'Chinese Yuan', 'CHF':'Swiss franc', 'JPY':'Japanese yen', 'SEK':'Swedish krona', 'AUD':'Australian dollar', 'HKD':'Hong Kong dollar', 'CAD':'Canadian dollar'}
 
 SEQ_LENGTH = 50             # Sequence length          
 INPUT_DIM = 1               # Dimension of input value

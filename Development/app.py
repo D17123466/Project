@@ -34,7 +34,6 @@ def main():
     form = ConverterForm()
     DATE_UPDATED = datetime.strptime(collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date'], "%Y-%m-%d").date().strftime("%d / %b / %Y")
     LIST = [(cur, rates) for cur, rates in collection.find({}, {'_id':0, 'Rates':1}).sort([('_id', -1)]).limit(1).next()['Rates'].items()]
-    CURRENCIES_NAME = {'KRW':'South Korean won', 'GBP':'Pound sterling', 'USD':'United States dollar', 'NZD':'New Zealand dollar', 'CNY':'Chinese Yuan', 'CHF':'Swiss franc', 'JPY':'Japanese yen', 'SEK':'Swedish krona', 'AUD':'Australian dollar', 'HKD':'Hong Kong dollar', 'CAD':'Canadian dollar'}
     # In case of normal
     if request.method == 'GET':
         return render_template('basic.html', form=form, CURRENCY_BASE=CURRENCY_BASE, CURRENCIES_NAME=CURRENCIES_NAME, DATE_UPDATED=DATE_UPDATED, LIST=LIST)
@@ -63,9 +62,9 @@ def chart():
     # LIST_5 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 5).items() if (key, value) not in LIST.items())
     RESULT = getPrediction(collection, LIST, CURRENCY_SELECTED)
     if request.method == 'GET':
-        return render_template('chart.html', LIST=LIST, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, CURRENCY_SELECTED=CURRENCY_SELECTED, RESULT=RESULT)
+        return render_template('chart.html', LIST=LIST, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, CURRENCY_SELECTED=CURRENCY_SELECTED, CURRENCIES_NAME=CURRENCIES_NAME, RESULT=RESULT)
     if request.method == 'POST':
-        return render_template('chart.html', LIST=LIST, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, CURRENCY_SELECTED=CURRENCY_SELECTED, RESULT=RESULT)
+        return render_template('chart.html', LIST=LIST, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, CURRENCY_SELECTED=CURRENCY_SELECTED, CURRENCIES_NAME=CURRENCIES_NAME, RESULT=RESULT)
 
 
 if __name__=='__main__':
