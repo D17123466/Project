@@ -1,6 +1,5 @@
 sudo apt-get update
-sudo apt-get install -y docker.io
+sudo apt-get install -y docker.io docker-compose
 
-# cd /home/ubuntu/Project/Deployment
-docker-compose build
-docker-compose up
+sudo docker-compose build
+sudo docker-compose up
