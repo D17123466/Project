@@ -228,7 +228,7 @@ def execLearning(collection):
         print('\n=============================================')
         print('Learning - ', cur, ' model')
         print('=============================================')
-        LIST = getHistorical(collection, cur, 10)
+        LIST = getHistorical(collection, cur, 5)
         DATASET = pd.DataFrame(list(LIST.items()), columns=['Date', 'Rate'])
         DATASET_ARRAY = getConvertToArray(DATASET)
         TRAIN_SIZE = int(len(DATASET_ARRAY)*0.9)
