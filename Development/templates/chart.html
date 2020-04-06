@@ -4,16 +4,14 @@
 <div class="container" style="margin-top: 5%; margin-bottom: 5%;">
   <p id='test'></p>
   <div class='row'>
-    <div class='col-2 offset-1'>
-      <div class='container-currency'>
+    <div class='col-3 offset-1'>
+      <div class='container-currency' style="margin-bottom: 10px;">
         <div class="flag"><img width="60" height="30" src="{{ url_for('static', filename='icon/EUR.svg') }}"></div>
         <div class="currency">
           <span class='currency-code'>EUR</span>
           <span class="currency-name">Euro</span> 
         </div>
       </div>
-    </div>
-    <div class='col-2'>
       <div class='container-currency'>
         <div class="flag"><img width="60" height="30" src="../static/icon/{{ CURRENCY_SELECTED }}.svg"></div>
         <div class="currency">
@@ -22,25 +20,25 @@
         </div>
       </div>
     </div>
-    <div class='col-2 offset-5'>
+    <div class='col-3 offset-5'>
       <a href="{{ url_for('main') }}"><button type="button" class="btn button-option">Return</button></a>
     </div>
   </div>
   <div class='container' style="margin-top: 5%; margin-bottom: 0%;">
     <div class="row">
       <div class='col'>
-        <canvas id="chart_currency" width="100%" height="70%"></canvas>
+        <canvas id="chart_currency" width="100%" height="50%"></canvas>
       </div>
     </div>
     <div class='row' style="margin-top: 5%;">
-      <div class="col-5 offset-4">
+      <div class="col-sm-5 offset-sm-4">
         <button id="addYear1" type="button" class="btn button-option">1 Year</button>
         <button id="addYear2" type="button" class="btn button-option">2 Year</button>
         <button id="addYear3" type="button" class="btn button-option">3 Year</button>
         <button id="addYear4" type="button" class="btn button-option">4 Year</button>
         <button id="addYear5" type="button" class="btn button-option">5 Year</button>
       </div>
-      <div class='col-3'>
+      <div class='col-sm-3'>
         <button id="addPrediction" type="button" class="btn button-option-2">Prediction</button>
         <button id="dropDataset" type="button" class="btn button-option-2">Drop</button>
       </div>
