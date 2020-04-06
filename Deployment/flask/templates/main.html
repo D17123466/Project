@@ -1,0 +1,33 @@
+{% import "bootstrap/wtf.html" as wtf %}
+<!-- <?xml version="1.0" encoding="iso-8859-1"?> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Exchange</title>
+  <link rel='icon' href="{{ url_for('static', filename='icon/LOGO.ico') }}" type='image/icon'>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/Chart.bundle.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/moment.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/vue.js') }}"></script>  
+</head>
+<body>
+  <div class="jumbotron">
+    <div class='container'>
+      <h1><a href="{{ url_for('main') }}"><img id="logo" width="70" height="40" src="{{ url_for('static', filename='icon/LOGO.ico') }}"></a>exchange</h1>
+    </div>
+  </div>
+  <div>
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+</html>
+
+
