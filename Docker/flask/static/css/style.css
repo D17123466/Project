@@ -1,0 +1,59 @@
+.button-option {
+    background-color: white; 
+    color: black;
+    border: 2px solid #008CBA;
+}
+.button-option:hover {
+    background-color: #008CBA;
+    color: white;
+}
+.button-option-2 {
+    background-color: white; 
+    color: black; 
+    border: 2px solid #f44336;
+}
+.button-option-2:hover{
+    background-color: #f44336;
+    color: white;
+}
+.container-currency {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    display: flex;
+    -webkit-box-align: center;
+    align-items:  center;
+    align-content: center;
+}
+.flag {
+    margin-right: -5px;
+}
+.currency  {
+    display: inline-block;
+    text-align: left;
+}
+.currency-code {
+    display: block;
+    font-size: 1.0rem;
+    font-weight: 900;
+    margin-bottom: -1px;
+}
+.currency-name {
+    display: block;
+    font-size: 0.4rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-bottom: -1px;
+}
+.canvas {
+    -moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+.logo {
+    margin-right: 10px;
+}
+.jumbotron {
+    padding: 1%;
+}
