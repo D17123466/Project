@@ -70,6 +70,6 @@ def chart():
 if __name__=='__main__':
     # Configure Job Scheduler kicking off the task updating the trained LSTM model
     setJobScheduler(collection)
-    app.run(host='0.0.0.0', port='8000')
+    app.run(host='0.0.0.0')
 
 
