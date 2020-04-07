@@ -12,7 +12,7 @@
 <br>
 
 
-## Final:
+## Development:
 
 ### This is the directories where the project bas been being developed.
 
@@ -20,9 +20,9 @@
 
   - <b>Web Development</b>
   
-    - Flask (Python)
+    - Flask (Python web framework)
     
-    - HTML
+    - HTML 
     
     - CSS / Bootstrap
     
@@ -31,62 +31,69 @@
     
   - <b>Currency Conversion & Currency Exchange Rates</b>
   
-    - Dataset (Free version API from external source)
+    - Json Dataset (Free version API from an external source)
     
+
+  - <b>Storage</b>
+
+    - MongoDB
   
-  - <b>Model</b>
+
+  - <b>Deep Learning</b>
   
-    - On Progress.
+    - Tensorflow 2 / Keras
+
+    - HDF5 
   
 
 <br>
 <br>
   
-## Development Environment:
+### Environment:
 
-### Init Setting
+#### Init Setting
 
-#### In the directory <Final>
+##### In the directory (/Development)
 
 ```
 pip3 install virtualenv
 virtualenv env -p python3
 ```
 
-### Virtual Environment
+#### Virtual Environment
 
-#### Activate
+##### Activate
 
-##### For Mac OS
+###### For Mac OS
 
 ```
 source env/bin/activate
 ```
 
-##### For Windows
+###### For Windows
 
 ```
 env\bin\activate
 ```
 
-#### Deactivate
+##### Deactivate
 
 ```
 deactivate
 ```
 
-### Install The Required Packages
+#### Install The Required Packages
 
 ```
 pip install -r requirements.txt
 ```
 
-### Run 
+#### Run 
 
 ```
-flask run
+python app.py
 ```
 
-### Open
+#### Open
 
-> [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
+> [http://0.0.0.0:5000/](http://0.0.0.0:5000/)
