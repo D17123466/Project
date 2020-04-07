@@ -5,4 +5,5 @@ sudo ln -s /etc/nginx/sites-available/nginx_proxy /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 sudo systemctl status nginx
 sudo ufw allow 'Nginx Full'
+sudo rm /home/ubuntu/Project/Deployment/nginx/nginx_proxy
 
