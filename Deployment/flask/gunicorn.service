@@ -4,7 +4,7 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/flask-app
+WorkingDirectory=/flask
 ExecStart=/usr/bin/gunicorn --workers 3 --bind unix:gunicorn.sock -m 007 wsgi:app
 [Install]
 WantedBy=multi-user.target
