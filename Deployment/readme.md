@@ -1,5 +1,9 @@
-1. sh init.sh
+1. git clone <git address>
 
-2. sh flask-conf.sh
+2. cd Project/Deployment
 
-3. sh nginx-conf.sh <Public IP (AWS)>
+3. sh init.sh
+
+4. sh flask-conf.sh
+
+5. sh nginx-conf.sh <Public IP (AWS)>
