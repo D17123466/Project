@@ -71,9 +71,9 @@ virtualenv env -p python3
 
 ###### For Ubuntu
 
-'''
+```
 . env/bin/activate
-'''
+```
 
 ###### For Mac OS
 
@@ -157,23 +157,23 @@ git clone https://github.com/D17123466/Project.git
 ##### Install all required packages
 ###### Ubuntu, Python, Flask, Tensorflow, MongoDB, Gunicorn, Nginx...
 
-'''
+```
 cd Project/Deployment
 sh init.sh
-'''
+```
 
 #### Configure Gunicorn
 
-'''
+```
 sh flask-conf.sh
-'''
+```
 
 #### Configure Nginx
 
-'''
+```
 sh nginx-conf.sh <AWS Instance Public IP>
-'''
+```
 
 #### Open (Stopping)
 
-> [AWS Instance Public IP]
+> [0.0.0.0](AWS Instance Public IP)
