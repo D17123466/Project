@@ -16,7 +16,7 @@
 
 ### This is the directories where the project bas been being developed.
 
-#### This project has the functions and technologies the followings:
+#### This development has technologies the followings:
 
   - <b>Web Development</b>
   
@@ -37,7 +37,12 @@
   - <b>Storage</b>
 
     - MongoDB
-  
+
+
+  - <b>Job Scheduler</b>
+
+    - APScheduler (Python package) 
+
 
   - <b>Deep Learning</b>
   
@@ -63,6 +68,12 @@ virtualenv env -p python3
 #### Virtual Environment
 
 ##### Activate
+
+###### For Ubuntu
+
+'''
+. env/bin/activate
+'''
 
 ###### For Mac OS
 
@@ -97,3 +108,72 @@ python app.py
 #### Open
 
 > [http://0.0.0.0:5000/](http://0.0.0.0:5000/)
+
+<br>
+<br>
+
+## Deployment:
+
+### This is the directories where the project bas been deployed on a cloud server.
+
+#### This deployment has the technologies the followings:
+
+  - <b>Instance Operating System</b>
+
+    - Ubuntu:18.04
+
+    
+  - <b>Web Application Server</b>
+  
+    - Gunicorn
+    
+
+  - <b>Web Server</b>
+
+    - Nginx
+  
+  
+  - <b>Container</b>
+
+    - Docker (In Progress)
+
+      - At the moment, bash files are used instead of docker container in order to get softwares to run reliably.
+
+<br>
+<br>
+
+### Environment:
+
+#### Init Setting
+
+##### In the directory (/home/ubuntu)
+
+##### Git clone repository
+
+```
+git clone https://github.com/D17123466/Project.git
+```
+
+##### Install all required packages
+###### Ubuntu, Python, Flask, Tensorflow, MongoDB, Gunicorn, Nginx...
+
+'''
+cd Project/Deployment
+sh init.sh
+'''
+
+#### Configure Gunicorn
+
+'''
+sh flask-conf.sh
+'''
+
+#### Configure Nginx
+
+'''
+sh nginx-conf.sh <AWS Instance Public IP>
+'''
+
+#### Open (Stopping)
+
+> [AWS Instance Public IP]
