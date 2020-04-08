@@ -56,7 +56,7 @@
   
 ### Environment:
 
-#### Init Setting
+#### Configure Setting
 
 ##### In the directory (/Development)
 
@@ -65,7 +65,7 @@ pip3 install virtualenv
 virtualenv env -p python3
 ```
 
-#### Virtual Environment
+#### Configure Virtual Environment
 
 ##### Activate
 
@@ -118,9 +118,11 @@ python app.py
 
 #### This deployment has the technologies the followings:
 
-  - <b>Instance Operating System</b>
+  - <b>Cloud Server</b>
 
-    - Ubuntu:18.04
+    - AWS
+
+      - Instance OS (Ubuntu:18.04)
 
     
   - <b>Web Application Server</b>
@@ -144,9 +146,9 @@ python app.py
 
 ### Environment:
 
-#### Init Setting
+#### Configure Setting
 
-##### In the directory (/home/ubuntu)
+##### In the AWS EC2 Instance directory (/home/ubuntu)
 
 ##### Git clone repository
 
