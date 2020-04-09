@@ -61,16 +61,11 @@ def chart():
     LIST_3_MAXMIN = getHighestLowest(LIST_3)
     LIST_4_MAXMIN = getHighestLowest(LIST_4)
     LIST_5_MAXMIN = getHighestLowest(LIST_5)
-
-    # LIST_2 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 2).items() if (key, value) not in LIST.items())
-    # LIST_3 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 3).items() if (key, value) not in LIST.items())
-    # LIST_4 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 4).items() if (key, value) not in LIST.items())
-    # LIST_5 = dict((key, value) for key, value in getHistorical(collection, CURRENCY_SELECTED, 5).items() if (key, value) not in LIST.items())
     RESULT = getPrediction(collection, LIST_1, CURRENCY_SELECTED)
     if request.method == 'GET':
-        return render_template('chart.html', LIST_1=LIST_1, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, LIST_1_MAXMIN=LIST_1_MAXMIN, LIST_2_MAXMIN=LIST_2_MAXMIN, LIST_3_MAXMIN=LIST_3_MAXMIN, LIST_4_MAXMIN=LIST_4_MAXMIN, LIST_5_MAXMIN=LIST_5_MAXMIN, CURRENCY_SELECTED=CURRENCY_SELECTED, CURRENCIES_NAME=CURRENCIES_NAME, RESULT=RESULT)
+        return render_template('chart.html', LIST_1=LIST_1, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, LIST_1_MAXMIN=LIST_1_MAXMIN, LIST_2_MAXMIN=LIST_2_MAXMIN, LIST_3_MAXMIN=LIST_3_MAXMIN, LIST_4_MAXMIN=LIST_4_MAXMIN, LIST_5_MAXMIN=LIST_5_MAXMIN, DATE_UPDATED=DATE_UPDATED, CURRENCY_SELECTED=CURRENCY_SELECTED, CURRENCIES_NAME=CURRENCIES_NAME, RESULT=RESULT)
     if request.method == 'POST':
-        return render_template('chart.html', LIST_1=LIST_1, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, LIST_1_MAXMIN=LIST_1_MAXMIN, LIST_2_MAXMIN=LIST_2_MAXMIN, LIST_3_MAXMIN=LIST_3_MAXMIN, LIST_4_MAXMIN=LIST_4_MAXMIN, LIST_5_MAXMIN=LIST_5_MAXMIN, CURRENCY_SELECTED=CURRENCY_SELECTED, CURRENCIES_NAME=CURRENCIES_NAME, RESULT=RESULT)
+        return render_template('chart.html', LIST_1=LIST_1, LIST_2=LIST_2, LIST_3=LIST_3, LIST_4=LIST_4, LIST_5=LIST_5, LIST_1_MAXMIN=LIST_1_MAXMIN, LIST_2_MAXMIN=LIST_2_MAXMIN, LIST_3_MAXMIN=LIST_3_MAXMIN, LIST_4_MAXMIN=LIST_4_MAXMIN, LIST_5_MAXMIN=LIST_5_MAXMIN, DATE_UPDATED=DATE_UPDATED, CURRENCY_SELECTED=CURRENCY_SELECTED, CURRENCIES_NAME=CURRENCIES_NAME, RESULT=RESULT)
 
 
 if __name__=='__main__':

@@ -30,7 +30,10 @@
       <a href="{{ url_for('main') }}"><button type="button" class="btn button-option">Return</button></a>
     </div>
   </div>
-  <div class='container' style="margin-top: 5%; margin-bottom: 0%;">
+  <div class="row justify-content-end">
+    <span><strong>Last Update {{ DATE_UPDATED }}</strong></span>
+  </div>
+  <div class='container' style="margin-top: 0%; margin-bottom: 0%;">
     <div class="row">
       <div class='col'>
         <canvas id="chart_currency" width="100%" height="50%"></canvas>
@@ -38,11 +41,11 @@
     </div>
     <div class='row' style="margin-top: 5%;">
       <div class="col-sm-5 offset-sm-4">
-        <button id="addYear1" type="button" class="btn button-option">1 Year</button>
-        <button id="addYear2" type="button" class="btn button-option">2 Year</button>
-        <button id="addYear3" type="button" class="btn button-option">3 Year</button>
-        <button id="addYear4" type="button" class="btn button-option">4 Year</button>
-        <button id="addYear5" type="button" class="btn button-option">5 Year</button>
+        <button onclick="myFunction(this)" id="1" type="button" class="btn button-option">1 Year</button>
+        <button onclick="myFunction(this)" id="2" type="button" class="btn button-option">2 Year</button>
+        <button onclick="myFunction(this)" id="3" type="button" class="btn button-option">3 Year</button>
+        <button onclick="myFunction(this)" id="4" type="button" class="btn button-option">4 Year</button>
+        <button onclick="myFunction(this)" id="5" type="button" class="btn button-option">5 Year</button>
       </div>
       <div class='col-sm-3'>
         <button id="addPrediction" type="button" class="btn button-option-2">Prediction</button>
@@ -51,9 +54,6 @@
     </div>
   </div>
 </div>
-<!-- <script>
-  document.getElementById('addYear1')
-</script> -->
 <script>
   var timeFormat = 'DD/MM/YYYY';
   var dataPoints = [];
@@ -82,7 +82,7 @@
       type: 'line',
       data: {
           datasets: [{
-              label: 'Historical (1 Year)',
+              label: 'Time-Series (1 Year)',
               data: dataPoints,
               fill: false,
               backgroundColor: window.chartColors.blue,
@@ -167,34 +167,79 @@
     window.chart = new Chart(ctx, config);
   };
 
-  var clickcallback = function(i) {
-    // setTimeout(function() {
-
-    // }, 1000);   // one second
-    // if(i <= 3) {
-    //     clickcallback(i+1);
-    // }
-    let id = "addYear" + i;
-    document.getElementById(id).click();
-    console.log('year1')
-  };
-  clickcallback(1);
-
-  document.getElementById('addYear1').addEventListener('click', function() {
+  function myFunction(year) {
     var dataPoints= [];
-    '{% for key, value in LIST_1.items() %}'
-        dataPoints.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
     var MAXMIN = [];
-    '{% for key, value in LIST_1_MAXMIN.items() %}'
-        MAXMIN.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
+    if (year.id == 1) {
+      '{% for key, value in LIST_1.items() %}'
+            dataPoints.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+        '{% for key, value in LIST_1_MAXMIN.items() %}'
+            MAXMIN.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+    }
+    else if (year.id == 2) {
+      '{% for key, value in LIST_2.items() %}'
+            dataPoints.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+        '{% for key, value in LIST_2_MAXMIN.items() %}'
+            MAXMIN.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+    }
+    else if (year.id == 3) {
+      '{% for key, value in LIST_3.items() %}'
+            dataPoints.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+        '{% for key, value in LIST_3_MAXMIN.items() %}'
+            MAXMIN.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+    }
+    else if (year.id == 4) {
+      '{% for key, value in LIST_4.items() %}'
+            dataPoints.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+        '{% for key, value in LIST_4_MAXMIN.items() %}'
+            MAXMIN.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+    }
+    else {
+      '{% for key, value in LIST_5.items() %}'
+            dataPoints.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+        '{% for key, value in LIST_5_MAXMIN.items() %}'
+            MAXMIN.push({
+              x: '{{ key }}',
+              y: '{{ value }}'
+            })
+        '{% endfor %}'
+    }
     var max_date = MAXMIN[0]['x'];
     var max_value = MAXMIN[0]['y'];
     var min_date = MAXMIN[1]['x'];
@@ -204,7 +249,7 @@
     document.getElementById('min_date').innerHTML = min_date
     document.getElementById('min_value').innerHTML = min_value
     var dataset = {
-      label: 'Historical (1 Year)',
+      label: 'Time-Series (' + year.id + ' Year)',
       data: dataPoints,
       fill: false,
       backgroundColor: window.chartColors.blue,
@@ -221,180 +266,7 @@
     }
     config.data.datasets.unshift(dataset)
     window.chart.update();
-  });
-
-  document.getElementById('addYear2').addEventListener('click', function() {
-    var dataPoints = [];
-    '{% for key, value in LIST_2.items() %}'
-        dataPoints.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var MAXMIN = [];
-    '{% for key, value in LIST_2_MAXMIN.items() %}'
-        MAXMIN.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var max_date = MAXMIN[0]['x'];
-    var max_value = MAXMIN[0]['y'];
-    var min_date = MAXMIN[1]['x'];
-    var min_value = MAXMIN[1]['y'];
-    document.getElementById('max_date').innerHTML = max_date
-    document.getElementById('max_value').innerHTML = max_value
-    document.getElementById('min_date').innerHTML = min_date
-    document.getElementById('min_value').innerHTML = min_value
-    var dataset = {
-      label: 'Historical (2 Year)',
-      data: dataPoints,
-      fill: false,
-      backgroundColor: window.chartColors.blue,
-      borderColor: window.chartColors.blue,
-      pointRadius: 0.7,
-      lineTension: 0,
-      borderWidth: 1
-    }
-    if (config.data.datasets.length == 1) {
-      config.data.datasets.pop();
-    }
-    else {
-      config.data.datasets.shift();
-    }
-    config.data.datasets.unshift(dataset)
-    window.chart.update();
-  });
-
-  document.getElementById('addYear3').addEventListener('click', function() {
-    var dataPoints = [];
-    '{% for key, value in LIST_3.items() %}'
-        dataPoints.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var MAXMIN = [];
-    '{% for key, value in LIST_3_MAXMIN.items() %}'
-        MAXMIN.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var max_date = MAXMIN[0]['x'];
-    var max_value = MAXMIN[0]['y'];
-    var min_date = MAXMIN[1]['x'];
-    var min_value = MAXMIN[1]['y'];
-    document.getElementById('max_date').innerHTML = max_date
-    document.getElementById('max_value').innerHTML = max_value
-    document.getElementById('min_date').innerHTML = min_date
-    document.getElementById('min_value').innerHTML = min_value
-    var dataset = {
-      label: 'Historical (3 Year)',
-      data: dataPoints,
-      fill: false,
-      backgroundColor: window.chartColors.blue,
-      borderColor: window.chartColors.blue,
-      pointRadius: 0.7,
-      lineTension: 0,
-      borderWidth: 1
-    }
-    if (config.data.datasets.length == 1) {
-      config.data.datasets.pop();
-    }
-    else {
-      config.data.datasets.shift();
-    }
-    config.data.datasets.unshift(dataset)
-    window.chart.update();
-  });
-
-  document.getElementById('addYear4').addEventListener('click', function() {
-    var dataPoints = [];
-    '{% for key, value in LIST_4.items() %}'
-        dataPoints.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var MAXMIN = [];
-    '{% for key, value in LIST_4_MAXMIN.items() %}'
-        MAXMIN.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var max_date = MAXMIN[0]['x'];
-    var max_value = MAXMIN[0]['y'];
-    var min_date = MAXMIN[1]['x'];
-    var min_value = MAXMIN[1]['y'];
-    document.getElementById('max_date').innerHTML = max_date
-    document.getElementById('max_value').innerHTML = max_value
-    document.getElementById('min_date').innerHTML = min_date
-    document.getElementById('min_value').innerHTML = min_value
-    var dataset = {
-      label: 'Historical (4 Year)',
-      data: dataPoints,
-      fill: false,
-      backgroundColor: window.chartColors.blue,
-      borderColor: window.chartColors.blue,
-      pointRadius: 0.7,
-      lineTension: 0,
-      borderWidth: 1
-    }
-    if (config.data.datasets.length == 1) {
-      config.data.datasets.pop();
-    }
-    else {
-      config.data.datasets.shift();
-    }
-    config.data.datasets.unshift(dataset)
-    window.chart.update();
-  });
-
-  document.getElementById('addYear5').addEventListener('click', function() {
-    var dataPoints = [];
-    '{% for key, value in LIST_5.items() %}'
-        dataPoints.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var MAXMIN = [];
-    '{% for key, value in LIST_5_MAXMIN.items() %}'
-        MAXMIN.push({
-          x: '{{ key }}',
-          y: '{{ value }}'
-        })
-    '{% endfor %}'
-    var max_date = MAXMIN[0]['x'];
-    var max_value = MAXMIN[0]['y'];
-    var min_date = MAXMIN[1]['x'];
-    var min_value = MAXMIN[1]['y'];
-    document.getElementById('max_date').innerHTML = max_date
-    document.getElementById('max_value').innerHTML = max_value
-    document.getElementById('min_date').innerHTML = min_date
-    document.getElementById('min_value').innerHTML = min_value
-    var dataset = {
-      label: 'Historical (5 Year)',
-      data: dataPoints,
-      fill: false,
-      backgroundColor: window.chartColors.blue,
-      borderColor: window.chartColors.blue,
-      pointRadius: 0.7,
-      lineTension: 0,
-      borderWidth: 1
-    }
-    if (config.data.datasets.length == 1) {
-      config.data.datasets.pop();
-    }
-    else {
-      config.data.datasets.shift();
-    }
-    config.data.datasets.unshift(dataset)
-    window.chart.update();
-  });
-
+  };
 
   document.getElementById('addPrediction').addEventListener('click', function() {
     var dataPoints_pred = [];
@@ -409,7 +281,7 @@
         })
     '{% endfor %}'
     var dataset_pred = {
-      label: 'Predictive',
+      label: 'Time-Series Prediction',
       data: dataPoints_pred,
       fill: false,
       backgroundColor: window.chartColors.red,
