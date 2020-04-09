@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sklearn.preprocessing import MinMaxScaler
 
 
-URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=XZKamxfqN1X9UEZMofEM&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
+URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=vVupG3fXW4TUy-WjXQHw&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
 API_CALL_SEC = 5
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
@@ -86,7 +86,6 @@ def getLiveCurrency(socketio, thread_stop):
     '''
     while not thread_stop.is_set():
         JSON = requests.get(URL_LIVE).json()["price"].items()
-        global LIST
         LIST={}
         for key, value in JSON:
             '''
@@ -101,12 +100,10 @@ def getConversion(from_, to_, amount):
     ''' 
     Computation of Conversion 
     '''
-    global LIST
     if from_ != to_:
-        # URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
-        # JSON = requests.get(URL_BASE).json()
-        # RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"
-        RESULT = f"{float(LIST[to_]/LIST[from_]*float(amount)):,}"
+        URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
+        JSON = requests.get(URL_BASE).json()
+        RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"
     else:
         RESULT = f"{float(amount):,}"
     return RESULT
