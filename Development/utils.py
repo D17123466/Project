@@ -5,6 +5,7 @@ import requests
 from datetime import datetime, timedelta 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sklearn.preprocessing import MinMaxScaler
+from overload import overload
 
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
@@ -65,8 +66,9 @@ def asyncMongoDB(collection):
     Async Database 
     '''
     # URLs for latest rates and historical rates
-    START_AT, LATEST = setPeriod(collection, 10)
+    START_AT, LATEST = setPeriod(collection, 10, 'update')
     IsEmpty= True if collection.count_documents({}) == 0 else False
+    print(START_AT, LATEST)
     IsInvalid = True if (collection.count_documents({'Date':{'$lt':START_AT}}) != 0 or collection.count_documents({'Date':{'$eq':LATEST}}) == 0) else False
     if IsEmpty:
         print('MongoDB: INSERT ')
@@ -105,12 +107,12 @@ def getSelectFieldForm():
 
 
 # Period
-def setPeriod(collection, YEAR):
+def setPeriod(collection, YEAR, FLAG):
     """
     Configuration of start point and end point from MongoDB for period
     """
     START_AT = (datetime.today() - timedelta(days=365*YEAR)).strftime("%Y-%m-%d")
-    if (collection.count_documents({}) == 0):
+    if (FLAG=='update'):
         LATEST = requests.get(URL_LATEST).json()['date']
         return START_AT, LATEST
     else:
@@ -162,7 +164,7 @@ def getHistorical(collection, CURRENCY_SELECTED, YEAR):
     ''' 
     Extraction of the historical dataset from N year(s) ago 
     '''
-    START_AT, END_AT = setPeriod(collection, YEAR)
+    START_AT, END_AT = setPeriod(collection, YEAR, 'select')
     LIST = {}
     for doc in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
         d = datetime.strptime(doc['Date'], '%Y-%m-%d').date()
@@ -183,7 +185,7 @@ def getPrediction(collection, LIST, CURRENCY_SELECTED):
     INPUT_SCALED = scaler.fit_transform(INPUT_ARRAY)
     INPUT_X, _ = buildSlidingWindow(INPUT_SCALED, SEQ_LENGTH)
     LSTM = tf.keras.models.load_model('./models/model_' + CURRENCY_SELECTED  + '.h5')
-    PREDICTION_START_AT = (datetime.strptime(setPeriod(collection, 1)[1], '%Y-%m-%d') + timedelta(days=1)).date()
+    PREDICTION_START_AT = (datetime.strptime(setPeriod(collection, 1, "select")[1], '%Y-%m-%d') + timedelta(days=1)).date()
     PREDICTION_END_AT = (datetime.today() + timedelta(days=180)).date()
     DAYS = (PREDICTION_END_AT - PREDICTION_START_AT).days + 1
     DATE = [PREDICTION_START_AT + timedelta(days=d) for d in range(DAYS)]
@@ -201,6 +203,17 @@ def getPrediction(collection, LIST, CURRENCY_SELECTED):
         d = d.strftime('%d/%m/%Y')
         RESULT[d] = float(PREDICTION_ACTUAL.item(i))
     return RESULT
+
+
+# Highest & Lowest Values
+def getHighestLowest(LIST):
+    '''
+    Extraction of Highest & Lowest exchange rates
+    '''
+    MAXMIN = {}
+    MAXMIN[max(LIST, key=LIST.get)] = max(LIST.values())
+    MAXMIN[min(LIST, key=LIST.get)] = min(LIST.values())
+    return MAXMIN
 
 
 # Job Scheduler  
