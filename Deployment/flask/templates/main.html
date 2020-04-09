@@ -1,5 +1,4 @@
 {% import "bootstrap/wtf.html" as wtf %}
-<!-- <?xml version="1.0" encoding="iso-8859-1"?> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +14,28 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/utils.js') }}"></script>  
   <script type="text/javascript" src="{{ url_for('static', filename='js/moment.min.js') }}"></script>  
   <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>  
-  <script type="text/javascript" src="{{ url_for('static', filename='js/vue.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>  
+  <script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>  
 </head>
 <body>
   <div class="jumbotron">
     <div class='container'>
-      <h1><a href="{{ url_for('main') }}"><img id="logo" width="70" height="40" src="{{ url_for('static', filename='icon/LOGO.ico') }}"></a>exchange</h1>
+      <h1><a href="{{ url_for('main') }}"><img id="logo" width="70" height="40" src="{{ url_for('static', filename='icon/LOGO.ico') }}"></a>Exchange</h1>
     </div>
   </div>
   <div>
     {% block content %}
     {% endblock %}
+  </div>
+  <div class="jumbotron" style="margin-bottom: 0%;">
+    <div class="row">
+      <div class="col-5 offset-5">
+        <span><strong>Copyright © Exchange</strong></span>
+      </div>
+      <div class="col-1 offset-1">
+        <span><a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" style="color: black;"><stron>source</stron></a></span>
+      </div>
+    </div>
   </div>
 </body>
 </html>

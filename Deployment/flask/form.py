@@ -5,6 +5,9 @@ import requests
 from utils import getSelectFieldForm
 
 class ConverterForm(FlaskForm):
+    '''
+    WTF Form
+    '''
     CHOICES = getSelectFieldForm()
     amount = FloatField('Amount', validators=[DataRequired()])
     from_ = SelectField('From',  choices=CHOICES)

@@ -3,9 +3,13 @@ import numpy as np
 import pandas as pd
 import requests
 from datetime import datetime, timedelta 
+from time import sleep
 from apscheduler.schedulers.background import BackgroundScheduler
 from sklearn.preprocessing import MinMaxScaler
 
+
+URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=XZKamxfqN1X9UEZMofEM&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
+API_CALL_SEC = 5
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
 URL_LATEST = URL_DEFAULT + 'latest'
@@ -34,12 +38,11 @@ def updateMongoDB(collection, URL, START_AT, END_AT):
     RATES = requests.get(URL).json()['rates']
     LIST={}
     for cur in CURRENCIES:
-        if cur in ['KRW', 'JPY']:
-            # LIST[cur] = '{:,.2f}'.format(RATES[cur])
-            LIST[cur] = RATES[cur]
-        else:
-            # LIST[cur] = '{:,.4f}'.format(RATES[cur])
-            LIST[cur] = RATES[cur]
+        # if cur in ['KRW', 'JPY']:
+        #     LIST[cur] = '{:,.2f}'.format(RATES[cur])
+        # else:
+        #     LIST[cur] = '{:,.4f}'.format(RATES[cur])
+        LIST[cur] = RATES[cur]
     collection.insert_one({'Date':DATE, 'Rates':LIST})  
 
 
@@ -51,12 +54,11 @@ def insertMongoDB(collection, URL):
     for date, rates in sorted(JSON):
         LIST={}
         for cur in CURRENCIES:
-            if cur in ['KRW', 'JPY']:
-                # LIST[cur] = '{:,.2f}'.format(rates[cur])
-                LIST[cur] = rates[cur]
-            else:
-                # LIST[cur] = '{:,.4f}'.format(rates[cur])
-                LIST[cur] = rates[cur]
+            # if cur in ['KRW', 'JPY']:
+            #     LIST[cur] = '{:,.2f}'.format(rates[cur])
+            # else:
+            #     LIST[cur] = '{:,.4f}'.format(rates[cur])
+            LIST[cur] = rates[cur]
         collection.insert_one({'Date':date, 'Rates': LIST})
 
 
@@ -64,8 +66,7 @@ def asyncMongoDB(collection):
     ''' 
     Async Database 
     '''
-    # URLs for latest rates and historical rates
-    START_AT, LATEST = setPeriod(collection, 10)
+    START_AT, LATEST = setPeriod(collection, 10, 'update')
     IsEmpty= True if collection.count_documents({}) == 0 else False
     IsInvalid = True if (collection.count_documents({'Date':{'$lt':START_AT}}) != 0 or collection.count_documents({'Date':{'$eq':LATEST}}) == 0) else False
     if IsEmpty:
@@ -78,21 +79,39 @@ def asyncMongoDB(collection):
         print('MongoDB: UP-TO-DATE')
 
 
-# Currency Conversion - Computation
+
+def getLiveCurrency(socketio, thread_stop):
+    '''
+    Configuration of currency rate in real time
+    '''
+    while not thread_stop.is_set():
+        JSON = requests.get(URL_LIVE).json()["price"].items()
+        global LIST
+        LIST={}
+        for key, value in JSON:
+            '''
+            Extraction of only 'to' currency code against 'EUR' currency code
+            '''
+            LIST[key[3:]] = value
+        socketio.emit('live', {'currency': LIST}, namespace='/live')
+        socketio.sleep(API_CALL_SEC)  
+
+
 def getConversion(from_, to_, amount):
     ''' 
     Computation of Conversion 
     '''
+    global LIST
     if from_ != to_:
-        URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
-        JSON = requests.get(URL_BASE).json()
-        RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"
+        # URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
+        # JSON = requests.get(URL_BASE).json()
+        # RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"
+        RESULT = f"{float(LIST[to_]/LIST[from_]*float(amount)):,}"
     else:
         RESULT = f"{float(amount):,}"
     return RESULT
 
 
-# WTForm - SelectField List
 def getSelectFieldForm():
     ''' 
     Extraction of SelectField'Choices
@@ -104,13 +123,12 @@ def getSelectFieldForm():
     return CHOICES
 
 
-# Period
-def setPeriod(collection, YEAR):
+def setPeriod(collection, YEAR, FLAG):
     """
     Configuration of start point and end point from MongoDB for period
     """
     START_AT = (datetime.today() - timedelta(days=365*YEAR)).strftime("%Y-%m-%d")
-    if (collection.count_documents({}) == 0):
+    if (FLAG=='update'):
         LATEST = requests.get(URL_LATEST).json()['date']
         return START_AT, LATEST
     else:
@@ -118,7 +136,6 @@ def setPeriod(collection, YEAR):
         return START_AT, END_AT
 
 
-# Data Type - Conversion to Array
 def getConvertToArray(DATASET):
     """
     Conversion of data type from DataFrame to Array
@@ -126,7 +143,6 @@ def getConvertToArray(DATASET):
     return np.array(DATASET.loc[:, ['Rate']].values)
 
 
-# Sliding Window
 def buildSlidingWindow(TIME_SERIES, SEQ_LENGTH):
     '''
     Build Sliding Windows
@@ -157,12 +173,11 @@ def buildSlidingWindow(TIME_SERIES, SEQ_LENGTH):
     return np.array(X), np.array(y)
 
 
-# Historical Dataset
 def getHistorical(collection, CURRENCY_SELECTED, YEAR):
     ''' 
     Extraction of the historical dataset from N year(s) ago 
     '''
-    START_AT, END_AT = setPeriod(collection, YEAR)
+    START_AT, END_AT = setPeriod(collection, YEAR, 'select')
     LIST = {}
     for doc in collection.find({'$and':[{'Date':{'$gte':START_AT}}, {'Date':{'$lte':END_AT}}]}, {'_id':0, 'Date':1, 'Rates.'+CURRENCY_SELECTED:1}):
         d = datetime.strptime(doc['Date'], '%Y-%m-%d').date()
@@ -171,7 +186,6 @@ def getHistorical(collection, CURRENCY_SELECTED, YEAR):
     return LIST
 
 
-# Predictive Dataset
 def getPrediction(collection, LIST, CURRENCY_SELECTED):
     '''
     Extraction of the predictive dataset
@@ -183,7 +197,7 @@ def getPrediction(collection, LIST, CURRENCY_SELECTED):
     INPUT_SCALED = scaler.fit_transform(INPUT_ARRAY)
     INPUT_X, _ = buildSlidingWindow(INPUT_SCALED, SEQ_LENGTH)
     LSTM = tf.keras.models.load_model('./models/model_' + CURRENCY_SELECTED  + '.h5')
-    PREDICTION_START_AT = (datetime.strptime(setPeriod(collection, 1)[1], '%Y-%m-%d') + timedelta(days=1)).date()
+    PREDICTION_START_AT = (datetime.strptime(setPeriod(collection, 1, "select")[1], '%Y-%m-%d') + timedelta(days=1)).date()
     PREDICTION_END_AT = (datetime.today() + timedelta(days=180)).date()
     DAYS = (PREDICTION_END_AT - PREDICTION_START_AT).days + 1
     DATE = [PREDICTION_START_AT + timedelta(days=d) for d in range(DAYS)]
@@ -203,30 +217,37 @@ def getPrediction(collection, LIST, CURRENCY_SELECTED):
     return RESULT
 
 
-# Job Scheduler  
+def getHighestLowest(LIST):
+    '''
+    Extraction of Highest & Lowest currency rate in N year(s) ago
+    '''
+    MAXMIN = {}
+    MAXMIN[max(LIST, key=LIST.get)] = max(LIST.values())
+    MAXMIN[min(LIST, key=LIST.get)] = min(LIST.values())
+    return MAXMIN
+
+
 def setJobScheduler(collection):
     '''
-    Configuration of a job running every 1:00 am on background
+    Configuration of a job running every 1:00 am in background
     '''
-    print('Job Scheduler - Configured\n')
+    print('Job Scheduler - Configured')
     scheduler = BackgroundScheduler()
     scheduler.add_job(execLearning, 'cron', hour='1', minute='00', id='flask_scheduler_id', args=(collection,))
-    # scheduler.add_job(execLearning, 'cron', hour='23', minute='36', id='flask_scheduler', args=(collection,))
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
 
 
-# Learning
 def execLearning(collection):
     ''' 
     Learning LSTM models for most traded currencies by value
     This func will be only executed at a specific time by trigger of Job Scheduler
     '''
     for cur in CURRENCIES:
-        print('\n=============================================')
-        print('Learning - ', cur, ' model')
+        print('=============================================')
+        print('Learning - Start ', cur, ' Model')
         print('=============================================')
         LIST = getHistorical(collection, cur, 5)
         DATASET = pd.DataFrame(list(LIST.items()), columns=['Date', 'Rate'])
@@ -248,7 +269,10 @@ def execLearning(collection):
         # SCORE = tf.model.evaluate(X_train, y_train, verbose=0)
         # print('Train Accuracy: ', SCORE[1]*100)
         tf.model.save('./models/model_' + cur + '.h5')
-    print('\nLearning - Completed')
+        print('=============================================')
+        print('Learning - End ', cur, ' Model')
+        print('=============================================')
+    print('Learning - Completed')
 
 
 
