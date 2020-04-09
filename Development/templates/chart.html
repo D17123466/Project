@@ -41,11 +41,11 @@
     </div>
     <div class='row' style="margin-top: 5%;">
       <div class="col-sm-5 offset-sm-4">
-        <button onclick="myFunction(this)" id="1" type="button" class="btn button-option">1 Year</button>
-        <button onclick="myFunction(this)" id="2" type="button" class="btn button-option">2 Year</button>
-        <button onclick="myFunction(this)" id="3" type="button" class="btn button-option">3 Year</button>
-        <button onclick="myFunction(this)" id="4" type="button" class="btn button-option">4 Year</button>
-        <button onclick="myFunction(this)" id="5" type="button" class="btn button-option">5 Year</button>
+        <button onclick="setYear(this)" id="1" type="button" class="btn button-option">1 Year</button>
+        <button onclick="setYear(this)" id="2" type="button" class="btn button-option">2 Year</button>
+        <button onclick="setYear(this)" id="3" type="button" class="btn button-option">3 Year</button>
+        <button onclick="setYear(this)" id="4" type="button" class="btn button-option">4 Year</button>
+        <button onclick="setYear(this)" id="5" type="button" class="btn button-option">5 Year</button>
       </div>
       <div class='col-sm-3'>
         <button id="addPrediction" type="button" class="btn button-option-2">Prediction</button>
@@ -117,7 +117,7 @@
             display: true,
 						ticks: {
 							callback: function(dataLabel, index) {
-								// Hide the label of every 2nd dataset. return null to hide the grid line too
+								// Hide the second label, returning null
 								return index % 2 === 0 ? dataLabel : '';
               },
               autoSkip: false,
@@ -167,7 +167,7 @@
     window.chart = new Chart(ctx, config);
   };
 
-  function myFunction(year) {
+  function setYear(year) {
     var dataPoints= [];
     var MAXMIN = [];
     if (year.id == 1) {
