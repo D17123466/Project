@@ -6,6 +6,6 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/Project/Deployment/flask
 Environment="PATH=/home/ubuntu/Project/Deployment/flask/venv/bin"
-ExecStart=/home/ubuntu/Project/Deployment/flask/venv/bin/gunicorn --workers 3 --bind unix:gunicorn.sock -m 007 wsgi:app
+ExecStart=/home/ubuntu/Project/Deployment/flask/venv/bin/gunicorn -k eventlet -w 1 -b 0.0.0.0:5000 wsgi:app
 [Install]
 WantedBy=multi-user.target
