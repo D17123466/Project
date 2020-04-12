@@ -164,18 +164,12 @@ cd Project/Deployment
 sh init.sh
 ```
 
-#### Configure Gunicorn
+#### Configure Gunicorn & Nginx
 
 ```
-sh flask-conf.sh
-```
-
-#### Configure Nginx
-
-```
-sh nginx-conf.sh <AWS Instance Public IP>
+sh start_ip.sh <AWS Instance Public IP>
 ```
 
 #### Open (Stopping)
 
-> [0.0.0.0](AWS Instance Public IP)
+> (AWS Instance Public IP)
