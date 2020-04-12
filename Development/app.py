@@ -25,7 +25,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 ''' Configure MongoDB '''
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/ExchangeDB'
 mongo = PyMongo(app)
-collection = mongo.db.currency
+collection = mongo.db.TimeSeries
 asyncMongoDB(collection)
 
 

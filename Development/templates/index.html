@@ -21,7 +21,7 @@
                   <div class="col">
                     <div class="row justify-content-start">
                       {% if form.is_submitted and RESULT %}
-                      <span><div id="converter" class="breadcrumb" style="margin-top: 10%;"><strong>{{ AMOUNT }} {{ FROM }} = {{  RESULT  }} {{ TO }}</strong></div></span>
+                      <div id="converter" class="breadcrumb" style="margin-top: 10%;"><strong>{{ AMOUNT }} {{ FROM }} = {{  RESULT  }} {{ TO }}</strong></div>
                       {% endif %}
                     </div>
                   </div>
@@ -109,9 +109,7 @@
           $('#'+cur).prepend('<img id="symbol" width="15" height="15" src="{{ url_for("static", filename="icon/UP.ico") }}">')
         }
         else {
-          $('#'+cur).css('color', 'black')
           $('#'+cur).html('' + list.currency[cur])
-          // $('#'+cur).prepend('<img id="symbol" width="15" height="15" src="{{ url_for("static", filename="icon/STATE.ico") }}">')
         }
       });
     });

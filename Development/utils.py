@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sklearn.preprocessing import MinMaxScaler
 
 
-URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=XZKamxfqN1X9UEZMofEM&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
+URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=Z2uOs3MgoUWYKCCYYsNE&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
 API_CALL_SEC = 5
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
@@ -103,9 +103,16 @@ def getConversion(from_, to_, amount):
     '''
     global LIST
     if from_ != to_:
-        # URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
-        # JSON = requests.get(URL_BASE).json()
-        # RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"
+        '''
+        Deployment Version
+
+        - In AWS, the global variable LIST was not working so it cannot be processed.
+        - Alternative, the below 3 lines will be replaced in this case but it is not real time value.
+
+        URL_BASE = URL_DEFAULT + 'latest' + '?base=' + from_
+        JSON = requests.get(URL_BASE).json()
+        RESULT = f"{float(JSON['rates'][to_]*float(amount)):,}"     
+        '''
         RESULT = f"{float(LIST[to_]/LIST[from_]*float(amount)):,}"
     else:
         RESULT = f"{float(amount):,}"
@@ -249,25 +256,36 @@ def execLearning(collection):
         print('=============================================')
         print('Learning - Start ', cur, ' Model')
         print('=============================================')
+        ''' Get Data '''
         LIST = getHistorical(collection, cur, 5)
+        ''' Clean, Prepare & Manipulate Data '''
         DATASET = pd.DataFrame(list(LIST.items()), columns=['Date', 'Rate'])
         DATASET_ARRAY = getConvertToArray(DATASET)
+        ''' Split Dataset '''
         TRAIN_SIZE = int(len(DATASET_ARRAY)*0.9)
-        TRAIN_SET =DATASET_ARRAY[0:TRAIN_SIZE]
+        TRAIN_SET = DATASET_ARRAY[0:TRAIN_SIZE]
         TEST_SET = DATASET_ARRAY[TRAIN_SIZE-SEQ_LENGTH:]
+        ''' Normalization '''
         scaler = MinMaxScaler(feature_range=(0, 1))
         TRAIN_SET_SCALED = scaler.fit_transform(TRAIN_SET)
         TEST_SET_SCALED = scaler.fit_transform(TEST_SET)
+        ''' Build Sliding Window '''
         X_train, y_train = buildSlidingWindow(TRAIN_SET_SCALED, SEQ_LENGTH)
         X_test, y_test = buildSlidingWindow(TEST_SET_SCALED, SEQ_LENGTH)
+        ''' Modeling '''
         tf.model = tf.keras.Sequential()
-        tf.model.add(tf.keras.layers.LSTM(units=1, input_shape=(SEQ_LENGTH, INPUT_DIM)))
+        tf.model.add(tf.keras.layers.LSTM(units=50, input_shape=(SEQ_LENGTH, INPUT_DIM)))
+        tf.model.add(tf.keras.layers.Dropout(0.2))
         tf.model.add(tf.keras.layers.Dense(units=OUTPUT_DIM, activation='tanh'))
         tf.model.summary()
+        ''' Tuning Model '''
         tf.model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(lr=LEARNING_RATE), metrics=['accuracy'])
+        ''' Training Model '''
         tf.model.fit(X_train, y_train, epochs=ITERATIONS)
-        # SCORE = tf.model.evaluate(X_train, y_train, verbose=0)
-        # print('Train Accuracy: ', SCORE[1]*100)
+        ''' Evaluation Accuracy '''
+        SCORE = tf.model.evaluate(X_train, y_train, verbose=0)
+        print('Accuracy : %.4f' % (SCORE[1]))
+        ''' Save the trained Model in .h5 format '''
         tf.model.save('./models/model_' + cur + '.h5')
         print('=============================================')
         print('Learning - End ', cur, ' Model')
@@ -275,4 +293,13 @@ def execLearning(collection):
     print('Learning - Completed')
 
 
+'''
+source: https://www.tensorflow.org/api_docs/python/tf/keras/layers/LSTM?hl=sk
 
+units: Positive integer, dimensionality of the output space.
+
+activation: Activation function to use. Default: hyperbolic tangent (tanh). If you pass None, no activation is applied (ie. "linear" activation: a(x) = x).
+
+dropout: Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs. Default: 0.
+
+'''
