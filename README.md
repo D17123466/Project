@@ -26,27 +26,44 @@
     
     - CSS / Bootstrap
     
-    - JavaScript (Chart.js)
+    - JavaScript / jQuery
+    
+    - Chart.js
     
     
   - <b>Currency Conversion & Currency Exchange Rates</b>
   
-    - Json Dataset (Free version API from an external source)
+    - JSON Dataset (Open-Source API)
+    
+      - FXMarketAPI
+      
+      - Exchange Rates API
     
 
   - <b>Storage</b>
 
     - MongoDB
+  
+      - Flask-PyMongo (Python package)
 
 
   - <b>Job Scheduler</b>
 
     - APScheduler (Python package) 
+    
+  
+  - <b>Real Time</b>
+  
+    - SocketIO
+  
+      - Flask-SocketIO (Python package)
 
 
-  - <b>Deep Learning</b>
+  - <b>Machine Learning & Deep Learning</b>
   
     - Tensorflow 2 / Keras
+    
+    - Scikit-learn
 
     - HDF5 
   
