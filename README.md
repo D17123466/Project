@@ -170,6 +170,13 @@ sh init.sh
 sh start_ip.sh <AWS Instance Public IP>
 ```
 
-#### Open (Stopping)
+#### Open
 
 > (AWS Instance Public IP)
+
+#### Stop
+
+```
+sh end.sh
+```
+
