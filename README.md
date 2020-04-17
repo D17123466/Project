@@ -150,13 +150,13 @@ python app.py
 
 ##### In the AWS EC2 Instance directory (/home/ubuntu)
 
-##### Git clone repository
+#### Git clone repository
 
 ```
 git clone https://github.com/D17123466/Project.git
 ```
 
-##### Install all required packages
+#### Install all required packages
 ###### Ubuntu, Python, Flask, Tensorflow, MongoDB, Gunicorn, Nginx...
 
 ```
