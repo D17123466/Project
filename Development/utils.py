@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sklearn.preprocessing import MinMaxScaler
 
 
-URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=Z2uOs3MgoUWYKCCYYsNE&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
+URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=xBymS6TpOo06nFJNb7v&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
 API_CALL_SEC = 5
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
@@ -27,15 +27,16 @@ ITERATIONS = 20             # Epoch
 PREDICTION_LENGTH = 128
 
 
-
 # MongoDB - Async
 def updateMongoDB(collection, URL, START_AT, END_AT):
     ''' 
     Update Database 
     '''
     collection.remove({'$or':[{'Date':{'$lt':START_AT}}, {'Date':{'$gt':END_AT}}]})
-    DATE = requests.get(URL).json()['date']
-    RATES = requests.get(URL).json()['rates']
+    JSON = requests.get(URL)
+    assert JSON.status_code == 200  # Unit Test for API Call
+    DATE = JSON.json()['date']
+    RATES = JSON.json()['rates']
     LIST={}
     for cur in CURRENCIES:
         # if cur in ['KRW', 'JPY']:
@@ -50,7 +51,9 @@ def insertMongoDB(collection, URL):
     ''' 
     Insert Database 
     '''
-    JSON = requests.get(URL).json()['rates'].items()
+    JSON = requests.get(URL)
+    assert JSON.status_code == 200  # Unit Test for API Call
+    JSON = JSON.json()['rates'].items()
     for date, rates in sorted(JSON):
         LIST={}
         for cur in CURRENCIES:
@@ -85,7 +88,9 @@ def getLiveCurrency(socketio, thread_stop):
     Configuration of currency rate in real time
     '''
     while not thread_stop.is_set():
-        JSON = requests.get(URL_LIVE).json()["price"].items()
+        JSON = requests.get(URL_LIVE)
+        assert JSON.status_code == 200  # Unit Test for API Call
+        JSON = JSON.json()["price"].items()
         global LIST
         LIST={}
         for key, value in JSON:
@@ -123,7 +128,9 @@ def getSelectFieldForm():
     ''' 
     Extraction of SelectField'Choices
     '''
-    JSON = requests.get(URL_LATEST).json()
+    JSON = requests.get(URL_LATEST)
+    assert JSON.status_code == 200  # Unit Test for API Call
+    JSON = JSON.json()
     CHOICES = [(key, key) for key in JSON['rates'] if key in CURRENCIES]
     CHOICES.append((CURRENCY_BASE, CURRENCY_BASE))
     CHOICES = CHOICES[::-1]
@@ -135,8 +142,11 @@ def setPeriod(collection, YEAR, FLAG):
     Configuration of start point and end point from MongoDB for period
     """
     START_AT = (datetime.today() - timedelta(days=365*YEAR)).strftime("%Y-%m-%d")
+    
     if (FLAG=='update'):
-        LATEST = requests.get(URL_LATEST).json()['date']
+        JSON = requests.get(URL_LATEST)
+        assert JSON.status_code == 200  # Unit Test for API Call
+        LATEST = JSON.json()['date']
         return START_AT, LATEST
     else:
         END_AT = collection.find({}, {'_id':0, 'Date':1}).sort([('_id', -1)]).limit(1).next()['Date']
