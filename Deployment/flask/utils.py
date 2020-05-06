@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sklearn.preprocessing import MinMaxScaler
 
 
-URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=lxBymS6TpOo06nFJNb7v&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
+URL_LIVE = 'https://fxmarketapi.com/apilive?api_key=JSVrIhFt1M9CRnbqGZ3U&currency=EURKRW,EURGBP,EURUSD,EURNZD,EURCNY,EURCHF,EURJPY,EURSEK,EURAUD,EURHKD,EURCAD,EUREUR'
 API_CALL_SEC = 5
 
 URL_DEFAULT = 'https://api.exchangeratesapi.io/'
