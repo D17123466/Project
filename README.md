@@ -1,4 +1,4 @@
-# Final Year Project: The prediction of currency exchange rates using LSTM. 
+# Final Year Project: The prediction of currency exchange rates using LSTM
 
 ## Demo:
 
