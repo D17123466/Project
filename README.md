@@ -1,4 +1,4 @@
-# Final Year Project
+# Final Year Project: The prediction of currency exchange rates
 
 ## Demo:
 
